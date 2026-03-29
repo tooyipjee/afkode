@@ -109,25 +109,6 @@ html, body {
   flex-shrink: 0;
 }
 
-#drag-spacer {
-  flex-shrink: 0;
-  width: 24px;
-  min-width: 16px;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: grab;
-}
-
-#drag-spacer::after {
-  content: '\u22EE\u22EE';
-  font-size: 8px;
-  letter-spacing: 1px;
-  color: var(--fg-faint);
-  opacity: 0.35;
-}
-
 #titlebar-label {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-size: 11px;
@@ -186,7 +167,6 @@ html, body {
   gap: 2px;
   flex: 1;
   min-width: 0;
-  -webkit-app-region: no-drag;
   position: relative;
 }
 
@@ -198,6 +178,7 @@ html, body {
   overflow-y: hidden;
   min-width: 0;
   scrollbar-width: none;
+  -webkit-app-region: no-drag;
 }
 
 #tabs::-webkit-scrollbar {
@@ -267,6 +248,7 @@ html, body {
   display: flex;
   align-items: center;
   flex-shrink: 0;
+  -webkit-app-region: no-drag;
 }
 
 #new-tab-btn,
