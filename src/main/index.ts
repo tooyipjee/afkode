@@ -1,8 +1,41 @@
-import { app, BrowserWindow, ipcMain } from 'electron';
+import { app, BrowserWindow, ipcMain, Menu } from 'electron';
 import { createWindow, loadWindow, getWindow, sendToWindow, setForceQuit } from './window';
 import { registerHotkey, unregisterAll } from './hotkey';
 import { createPty, destroyPty } from './pty';
 import { createTray, destroyTray } from './tray';
+
+function setAppMenu(): void {
+  const isMac = process.platform === 'darwin';
+  const template: Electron.MenuItemConstructorOptions[] = isMac
+    ? [
+        {
+          label: app.name,
+          submenu: [
+            { role: 'about' },
+            { type: 'separator' },
+            { role: 'hide' },
+            { role: 'hideOthers' },
+            { role: 'unhide' },
+            { type: 'separator' },
+            { role: 'quit' },
+          ],
+        },
+        {
+          label: 'Edit',
+          submenu: [
+            { role: 'undo' },
+            { role: 'redo' },
+            { type: 'separator' },
+            { role: 'cut' },
+            { role: 'copy' },
+            { role: 'paste' },
+            { role: 'selectAll' },
+          ],
+        },
+      ]
+    : [];
+  Menu.setApplicationMenu(template.length ? Menu.buildFromTemplate(template) : null);
+}
 
 if (process.platform === 'linux') {
   app.commandLine.appendSwitch('enable-transparent-visuals');
@@ -43,6 +76,7 @@ if (!gotLock) {
   });
 
   app.whenReady().then(() => {
+    setAppMenu();
     const win = initWindow();
 
     ipcMain.on('overlay:dismiss', () => {

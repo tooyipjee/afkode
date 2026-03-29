@@ -32,6 +32,7 @@ export const BrowserWindow = vi.fn(function (this: any, opts: any) {
 BrowserWindow.getAllWindows = vi.fn(() => []);
 
 export const app = {
+  name: 'AFKode',
   getAppPath: vi.fn(() => '/mock/app'),
   whenReady: vi.fn(() => Promise.resolve()),
   on: vi.fn(),
@@ -97,6 +98,7 @@ export const Tray = vi.fn(function (this: any) {
 
 export const Menu = {
   buildFromTemplate: vi.fn(() => ({})),
+  setApplicationMenu: vi.fn(),
 };
 
 export const contextBridge = {

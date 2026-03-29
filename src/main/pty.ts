@@ -48,7 +48,8 @@ function spawnForTab(tabId: string, shellPath: string): boolean {
   const win = targetWin;
 
   try {
-    const ptyProcess = nodePty.spawn(shellPath, [], {
+    const args = isWin ? [] : ['-l'];
+    const ptyProcess = nodePty.spawn(shellPath, args, {
       name: 'xterm-256color',
       cols: 80,
       rows: 24,
