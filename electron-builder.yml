@@ -16,7 +16,10 @@ asar: true
 npmRebuild: false
 publish: null
 
+icon: assets/icon.png
+
 mac:
+  icon: assets/icon.png
   target:
     - target: dmg
       arch:
@@ -34,6 +37,7 @@ dmg:
   title: "${productName}"
 
 win:
+  icon: assets/icon.png
   target:
     - target: nsis
       arch:

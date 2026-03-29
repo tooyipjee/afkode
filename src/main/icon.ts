@@ -25,23 +25,27 @@ export function getIconPath(): string | null {
 
 export function getTrayIcon(): nativeImage {
   const iconPath = getIconPath();
+  const size = process.platform === 'win32' ? 16 : 18;
+
   if (iconPath) {
     const icon = nativeImage.createFromPath(iconPath);
-    return icon.resize({ width: 18, height: 18 });
+    return icon.resize({ width: size, height: size });
   }
-  return createFallbackTrayIcon();
+  return createFallbackTrayIcon(size);
 }
 
-function createFallbackTrayIcon(): nativeImage {
-  const size = 32;
+function createFallbackTrayIcon(size: number): nativeImage {
   const canvas = Buffer.alloc(size * size * 4, 0);
+  const pad = Math.round(size * 0.1);
+  const inner = size - pad * 2;
 
   for (let y = 0; y < size; y++) {
     for (let x = 0; x < size; x++) {
       const idx = (y * size + x) * 4;
-      const inRect = x >= 3 && x < size - 3 && y >= 5 && y < size - 5;
-      const isEdge = inRect && (x === 3 || x === size - 4 || y === 5 || y === size - 6);
-      const isPrompt = y >= 12 && y <= 19 && ((x >= 8 && x <= 10) || (x >= 13 && x <= 20));
+      const inRect = x >= pad && x < pad + inner && y >= pad && y < pad + inner;
+      const isEdge = inRect && (x === pad || x === pad + inner - 1 || y === pad || y === pad + inner - 1);
+      const cy = Math.round(size * 0.45);
+      const isPrompt = y >= cy - 2 && y <= cy + 2 && ((x >= pad + 2 && x <= pad + 4) || (x >= pad + 6 && x <= pad + inner - 3));
 
       if (isEdge || isPrompt) {
         canvas[idx] = 255;
