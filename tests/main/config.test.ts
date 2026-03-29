@@ -1,0 +1,84 @@
+import { describe, it, expect } from 'vitest';
+import { getConfig, setConfig, getAllConfig, isValidShell, defaults } from '../../src/main/config';
+
+describe('config', () => {
+  it('returns default hotkey', () => {
+    expect(getConfig('hotkey')).toBe('CommandOrControl+`');
+  });
+
+  it('returns default opacity', () => {
+    expect(getConfig('opacity')).toBe(0.95);
+  });
+
+  it('returns a shell path', () => {
+    const shell = getConfig('shellPath');
+    expect(typeof shell).toBe('string');
+    expect(shell.length).toBeGreaterThan(0);
+  });
+
+  it('returns null for default windowBounds', () => {
+    expect(getConfig('windowBounds')).toBeNull();
+  });
+
+  it('setConfig persists value', () => {
+    setConfig('opacity', 0.8);
+    expect(getConfig('opacity')).toBe(0.8);
+    setConfig('opacity', 0.95);
+  });
+
+  it('setConfig persists windowBounds', () => {
+    const bounds = { x: 100, y: 200, width: 800, height: 600 };
+    setConfig('windowBounds', bounds);
+    expect(getConfig('windowBounds')).toEqual(bounds);
+    setConfig('windowBounds', null);
+  });
+
+  it('getAllConfig returns full config with validated values', () => {
+    const config = getAllConfig();
+    expect(config).toHaveProperty('hotkey');
+    expect(config).toHaveProperty('opacity');
+    expect(config).toHaveProperty('shellPath');
+    expect(config).toHaveProperty('windowBounds');
+  });
+
+  it('validates opacity — returns default for invalid values', () => {
+    setConfig('opacity', -1 as any);
+    expect(getConfig('opacity')).toBe(defaults.opacity);
+    setConfig('opacity', 0.95);
+  });
+
+  it('validates hotkey — returns default for empty string', () => {
+    setConfig('hotkey', '' as any);
+    expect(getConfig('hotkey')).toBe(defaults.hotkey);
+    setConfig('hotkey', 'CommandOrControl+`');
+  });
+
+  it('shellPath defaults appropriately for platform', () => {
+    const shell = getConfig('shellPath');
+    if (process.platform === 'win32') {
+      expect(shell).toMatch(/cmd\.exe|powershell/i);
+    } else {
+      expect(shell).toMatch(/\//);
+    }
+  });
+});
+
+describe('isValidShell', () => {
+  it('accepts /bin/sh', () => {
+    if (process.platform !== 'win32') {
+      expect(isValidShell('/bin/sh')).toBe(true);
+    }
+  });
+
+  it('accepts /bin/zsh', () => {
+    if (process.platform !== 'win32') {
+      expect(isValidShell('/bin/zsh')).toBe(true);
+    }
+  });
+
+  it('rejects nonexistent path', () => {
+    if (process.platform !== 'win32') {
+      expect(isValidShell('/nonexistent/shell')).toBe(false);
+    }
+  });
+});
