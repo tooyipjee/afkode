@@ -72,11 +72,12 @@ async function init() {
 
   const hotkeyHint = document.getElementById('hotkey-hint');
   if (hotkeyHint) {
-    const hotkey = (config.hotkey as string) || 'CommandOrControl+`';
+    const hotkey = (config.hotkey as string) || 'Control+`';
     const platform = config.platform as string;
-    const modKey = platform === 'darwin' ? '\u2318' : 'Ctrl';
+    const modKey = platform === 'darwin' ? '\u2303' : 'Ctrl';
     hotkeyHint.textContent = hotkey
       .replace('CommandOrControl', modKey)
+      .replace('Control', modKey)
       .replace(/\+/g, platform === 'darwin' ? '' : '+');
   }
 

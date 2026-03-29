@@ -11,7 +11,7 @@ describe('hotkey', () => {
   it('registerHotkey calls globalShortcut.register', () => {
     registerHotkey();
     expect(globalShortcut.register).toHaveBeenCalledWith(
-      'CommandOrControl+`',
+      'Control+`',
       expect.any(Function),
     );
   });
@@ -20,7 +20,7 @@ describe('hotkey', () => {
     (globalShortcut.register as any).mockReturnValueOnce(true);
     registerHotkey();
     unregisterAll();
-    expect(globalShortcut.unregister).toHaveBeenCalledWith('CommandOrControl+`');
+    expect(globalShortcut.unregister).toHaveBeenCalledWith('Control+`');
   });
 
   it('logs error when registration fails', () => {
@@ -104,7 +104,7 @@ describe('hotkey — reregisterHotkey', () => {
     expect(globalShortcut.register).toHaveBeenCalledTimes(1);
 
     reregisterHotkey();
-    expect(globalShortcut.unregister).toHaveBeenCalledWith('CommandOrControl+`');
+    expect(globalShortcut.unregister).toHaveBeenCalledWith('Control+`');
     expect(globalShortcut.register).toHaveBeenCalledTimes(2);
   });
 });

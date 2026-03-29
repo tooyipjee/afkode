@@ -62,8 +62,7 @@ export function attachTerminalKeyHandler(terminal: Terminal): void {
         closeSettings();
         return false;
       }
-      window.electronAPI.hideOverlay();
-      return false;
+      return true;
     }
 
     // Settings: Cmd+, (Mac) or Ctrl+, (Win/Linux)

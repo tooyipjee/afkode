@@ -86,7 +86,7 @@ interface OverlayConfig {
 }
 
 const defaults: OverlayConfig = {
-  hotkey: 'CommandOrControl+`',
+  hotkey: 'Control+`',
   opacity: 0.95,
   shellPath: defaultShell(),
   windowBounds: null,

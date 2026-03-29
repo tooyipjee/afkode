@@ -3,7 +3,7 @@ import { getConfig, setConfig, getAllConfig, isValidShell, getAvailableShells, d
 
 describe('config', () => {
   it('returns default hotkey', () => {
-    expect(getConfig('hotkey')).toBe('CommandOrControl+`');
+    expect(getConfig('hotkey')).toBe('Control+`');
   });
 
   it('returns default opacity', () => {
@@ -102,13 +102,13 @@ describe('config', () => {
   it('validates hotkey — returns default for empty string', () => {
     setConfig('hotkey', '' as any);
     expect(getConfig('hotkey')).toBe(defaults.hotkey);
-    setConfig('hotkey', 'CommandOrControl+`');
+    setConfig('hotkey', 'Control+`');
   });
 
   it('validates hotkey — returns default for non-string', () => {
     setConfig('hotkey', 123 as any);
     expect(getConfig('hotkey')).toBe(defaults.hotkey);
-    setConfig('hotkey', 'CommandOrControl+`');
+    setConfig('hotkey', 'Control+`');
   });
 
   it('validates fontSize — returns default for below minimum (8)', () => {
@@ -207,7 +207,7 @@ describe('config', () => {
     expect(config.theme).toBe(defaults.theme);
 
     setConfig('opacity', 0.95);
-    setConfig('hotkey', 'CommandOrControl+`');
+    setConfig('hotkey', 'Control+`');
     setConfig('fontSize', 13);
     setConfig('theme', 'afkode');
   });
