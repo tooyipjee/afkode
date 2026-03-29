@@ -6,43 +6,31 @@ Terminal overlay for gamers. You're dead? You're coding. Press a hotkey, get a t
 
 - **Transparent overlay** — frameless, always-on-top, dark translucent background
 - **Global hotkey** — toggle with `Cmd+`` (macOS) / `Ctrl+`` (Win/Linux)
+- **Tabs** — multiple terminal sessions with tab bar
+- **Shell picker** — choose your shell (PowerShell, Git Bash, WSL, etc.)
 - **Full terminal** — real PTY shell powered by xterm.js + node-pty
 - **Escape to dismiss** — press Escape to hide and get back to the game
-- **System tray** — change opacity from the tray menu
+- **System tray** — change opacity and default shell from the tray menu
 - **Persisted layout** — remembers window position and size between sessions
 - **Cross-platform** — macOS, Windows, Linux
 
-## Install
+## Quick Install
 
-Download the latest release for your platform from [Releases](https://github.com/jasontoo/afkode/releases).
-
-### macOS
-
-1. Download `AFKode-x.x.x-mac-arm64.dmg` (Apple Silicon) or `AFKode-x.x.x-mac-x64.dmg` (Intel)
-2. Open the DMG and drag **AFKode** to Applications
-3. On first launch, right-click and select **Open** (Gatekeeper blocks unsigned apps)
-
-### Windows
-
-1. Download `AFKode-x.x.x-win-x64.exe`
-2. Run the installer
-
-### Linux
-
-1. Download `AFKode-x.x.x-linux-x64.AppImage` or `.deb`
-2. AppImage: `chmod +x AFKode-*.AppImage && ./AFKode-*.AppImage`
-3. Debian/Ubuntu: `sudo dpkg -i afkode-*.deb`
-
-Needs a compositor with transparency support (X11 with picom, or Wayland).
-
-## Dev Setup
+### macOS / Linux
 
 ```bash
-git clone https://github.com/jasontoo/afkode.git
-cd afkode
-npm install
-npm run dev
+curl -fsSL https://raw.githubusercontent.com/tooyipjee/afkode/main/install.sh | sh
 ```
+
+### Windows (PowerShell)
+
+```powershell
+irm https://raw.githubusercontent.com/tooyipjee/afkode/main/install.ps1 | iex
+```
+
+### Manual Download
+
+Grab the latest build from [Releases](https://github.com/tooyipjee/afkode/releases).
 
 ## Hotkeys
 
@@ -50,6 +38,20 @@ npm run dev
 |-----|--------|
 | `Cmd+`` / `Ctrl+`` | Toggle overlay |
 | `Escape` | Hide overlay |
+| `Cmd+T` / `Ctrl+Shift+T` | New tab |
+| `Cmd+W` / `Ctrl+Shift+W` | Close tab |
+| `Ctrl+Tab` | Next tab |
+| `Ctrl+Shift+Tab` | Previous tab |
+| `Cmd+1-9` / `Ctrl+1-9` | Switch to tab |
+
+## Dev Setup
+
+```bash
+git clone https://github.com/tooyipjee/afkode.git
+cd afkode
+npm install
+npm run dev
+```
 
 ## Building from Source
 
