@@ -48,12 +48,13 @@ function spawnForTab(tabId: string, shellPath: string): boolean {
   const win = targetWin;
 
   try {
-    const args = isWin ? [] : ['-l'];
+    const isWsl = isWin && /wsl(\.exe)?$/i.test(shellPath);
+    const args = isWsl ? ['--cd', '~'] : isWin ? [] : ['-l'];
     const ptyProcess = nodePty.spawn(shellPath, args, {
       name: 'xterm-256color',
       cols: 80,
       rows: 24,
-      cwd: homedir(),
+      cwd: isWsl ? undefined : homedir(),
       env: getSpawnEnv(),
     });
 
