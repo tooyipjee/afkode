@@ -18,8 +18,8 @@ function createMockWindow() {
     setAlwaysOnTop: vi.fn(),
     on: vi.fn(),
     once: vi.fn(),
-    loadURL: vi.fn(),
-    loadFile: vi.fn(),
+    loadURL: vi.fn(() => Promise.resolve()),
+    loadFile: vi.fn(() => Promise.resolve()),
     webContents,
   };
 }
@@ -39,6 +39,7 @@ export const app = {
   requestSingleInstanceLock: vi.fn(() => true),
   commandLine: { appendSwitch: vi.fn() },
   getPath: vi.fn((name: string) => `/mock/${name}`),
+  isPackaged: false,
 };
 
 export const ipcMain = {
@@ -52,6 +53,7 @@ export const ipcRenderer = {
   on: vi.fn(),
   send: vi.fn(),
   invoke: vi.fn(),
+  removeAllListeners: vi.fn(),
 };
 
 export const globalShortcut = {
@@ -64,6 +66,9 @@ export const screen = {
   getPrimaryDisplay: vi.fn(() => ({
     workAreaSize: { width: 1920, height: 1080 },
   })),
+  getAllDisplays: vi.fn(() => [{
+    bounds: { x: 0, y: 0, width: 1920, height: 1080 },
+  }]),
 };
 
 export const nativeImage = {

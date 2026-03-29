@@ -28,7 +28,7 @@ describe('config', () => {
     expect(getConfig('windowBounds')).toBeNull();
   });
 
-  it('setConfig persists value', () => {
+  it('setConfig persists opacity', () => {
     setConfig('opacity', 0.8);
     expect(getConfig('opacity')).toBe(0.8);
     setConfig('opacity', 0.95);
@@ -63,9 +63,39 @@ describe('config', () => {
     expect(config).toHaveProperty('theme');
   });
 
-  it('validates opacity — returns default for invalid values', () => {
+  it('validates opacity — returns default for negative', () => {
     setConfig('opacity', -1 as any);
     expect(getConfig('opacity')).toBe(defaults.opacity);
+    setConfig('opacity', 0.95);
+  });
+
+  it('validates opacity — returns default for > 1', () => {
+    setConfig('opacity', 1.5 as any);
+    expect(getConfig('opacity')).toBe(defaults.opacity);
+    setConfig('opacity', 0.95);
+  });
+
+  it('validates opacity — returns default for NaN', () => {
+    setConfig('opacity', NaN as any);
+    expect(getConfig('opacity')).toBe(defaults.opacity);
+    setConfig('opacity', 0.95);
+  });
+
+  it('validates opacity — returns default for non-number', () => {
+    setConfig('opacity', 'bad' as any);
+    expect(getConfig('opacity')).toBe(defaults.opacity);
+    setConfig('opacity', 0.95);
+  });
+
+  it('validates opacity — accepts boundary value 0', () => {
+    setConfig('opacity', 0);
+    expect(getConfig('opacity')).toBe(0);
+    setConfig('opacity', 0.95);
+  });
+
+  it('validates opacity — accepts boundary value 1', () => {
+    setConfig('opacity', 1);
+    expect(getConfig('opacity')).toBe(1);
     setConfig('opacity', 0.95);
   });
 
@@ -75,11 +105,45 @@ describe('config', () => {
     setConfig('hotkey', 'CommandOrControl+`');
   });
 
-  it('validates fontSize — returns default for out of range', () => {
-    setConfig('fontSize', 2 as any);
+  it('validates hotkey — returns default for non-string', () => {
+    setConfig('hotkey', 123 as any);
+    expect(getConfig('hotkey')).toBe(defaults.hotkey);
+    setConfig('hotkey', 'CommandOrControl+`');
+  });
+
+  it('validates fontSize — returns default for below minimum (8)', () => {
+    setConfig('fontSize', 7 as any);
     expect(getConfig('fontSize')).toBe(defaults.fontSize);
-    setConfig('fontSize', 50 as any);
+    setConfig('fontSize', 13);
+  });
+
+  it('validates fontSize — returns default for above maximum (28)', () => {
+    setConfig('fontSize', 29 as any);
     expect(getConfig('fontSize')).toBe(defaults.fontSize);
+    setConfig('fontSize', 13);
+  });
+
+  it('validates fontSize — returns default for NaN', () => {
+    setConfig('fontSize', NaN as any);
+    expect(getConfig('fontSize')).toBe(defaults.fontSize);
+    setConfig('fontSize', 13);
+  });
+
+  it('validates fontSize — returns default for non-number', () => {
+    setConfig('fontSize', 'big' as any);
+    expect(getConfig('fontSize')).toBe(defaults.fontSize);
+    setConfig('fontSize', 13);
+  });
+
+  it('validates fontSize — accepts boundary value 8', () => {
+    setConfig('fontSize', 8);
+    expect(getConfig('fontSize')).toBe(8);
+    setConfig('fontSize', 13);
+  });
+
+  it('validates fontSize — accepts boundary value 28', () => {
+    setConfig('fontSize', 28);
+    expect(getConfig('fontSize')).toBe(28);
     setConfig('fontSize', 13);
   });
 
@@ -89,6 +153,38 @@ describe('config', () => {
     setConfig('theme', 'afkode');
   });
 
+  it('validates theme — returns default for empty string', () => {
+    setConfig('theme', '' as any);
+    expect(getConfig('theme')).toBe(defaults.theme);
+    setConfig('theme', 'afkode');
+  });
+
+  it('validates theme — returns default for non-string', () => {
+    setConfig('theme', 42 as any);
+    expect(getConfig('theme')).toBe(defaults.theme);
+    setConfig('theme', 'afkode');
+  });
+
+  it('validates theme — accepts all valid themes', () => {
+    for (const t of ['afkode', 'dracula', 'nord', 'one-dark', 'solarized']) {
+      setConfig('theme', t);
+      expect(getConfig('theme')).toBe(t);
+    }
+    setConfig('theme', 'afkode');
+  });
+
+  it('validates shellPath — returns default for non-string', () => {
+    setConfig('shellPath', 42 as any);
+    expect(getConfig('shellPath')).toBe(defaults.shellPath);
+    setConfig('shellPath', defaults.shellPath);
+  });
+
+  it('validates shellPath — returns default for invalid path', () => {
+    setConfig('shellPath', '/nonexistent/bad/shell' as any);
+    expect(getConfig('shellPath')).toBe(defaults.shellPath);
+    setConfig('shellPath', defaults.shellPath);
+  });
+
   it('shellPath defaults appropriately for platform', () => {
     const shell = getConfig('shellPath');
     if (process.platform === 'win32') {
@@ -96,6 +192,24 @@ describe('config', () => {
     } else {
       expect(shell).toMatch(/\//);
     }
+  });
+
+  it('getAllConfig returns consistent validated values after corruption', () => {
+    setConfig('opacity', NaN as any);
+    setConfig('hotkey', '' as any);
+    setConfig('fontSize', -1 as any);
+    setConfig('theme', 'bogus' as any);
+
+    const config = getAllConfig();
+    expect(config.opacity).toBe(defaults.opacity);
+    expect(config.hotkey).toBe(defaults.hotkey);
+    expect(config.fontSize).toBe(defaults.fontSize);
+    expect(config.theme).toBe(defaults.theme);
+
+    setConfig('opacity', 0.95);
+    setConfig('hotkey', 'CommandOrControl+`');
+    setConfig('fontSize', 13);
+    setConfig('theme', 'afkode');
   });
 });
 
@@ -112,10 +226,20 @@ describe('isValidShell', () => {
     }
   });
 
-  it('rejects nonexistent path', () => {
+  it('accepts /bin/bash', () => {
+    if (process.platform !== 'win32') {
+      expect(isValidShell('/bin/bash')).toBe(true);
+    }
+  });
+
+  it('rejects nonexistent path on unix', () => {
     if (process.platform !== 'win32') {
       expect(isValidShell('/nonexistent/shell')).toBe(false);
     }
+  });
+
+  it('rejects empty string', () => {
+    expect(isValidShell('')).toBe(false);
   });
 });
 
@@ -142,5 +266,12 @@ describe('getAvailableShells', () => {
     const shells = getAvailableShells();
     const paths = shells.map((s) => s.path);
     expect(new Set(paths).size).toBe(paths.length);
+  });
+
+  it('returned shells are valid according to isValidShell', () => {
+    const shells = getAvailableShells();
+    for (const shell of shells) {
+      expect(isValidShell(shell.path)).toBe(true);
+    }
   });
 });

@@ -1,6 +1,7 @@
 import { BrowserWindow, ipcMain } from 'electron';
 import { getAllConfig, getConfig, setConfig, getAvailableShells } from './config';
 import { homedir } from 'os';
+import * as nodePty from 'node-pty';
 
 const isWin = process.platform === 'win32';
 
@@ -35,8 +36,6 @@ function spawnForTab(tabId: string, shellPath: string): void {
   const win = targetWin;
 
   try {
-    const nodePty = require('node-pty') as typeof import('node-pty');
-
     const env: Record<string, string> = {
       ...process.env as Record<string, string>,
     };
