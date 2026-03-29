@@ -103,7 +103,9 @@ export const contextBridge = {
   exposeInMainWorld: vi.fn(),
 };
 
-export const shell = {};
+export const shell = {
+  openExternal: vi.fn(() => Promise.resolve()),
+};
 
 export default {
   app,

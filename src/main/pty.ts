@@ -1,7 +1,9 @@
-import { BrowserWindow, ipcMain } from 'electron';
+import { BrowserWindow, ipcMain, shell } from 'electron';
 import { getAllConfig, getConfig, setConfig, getAvailableShells } from './config';
 import { homedir } from 'os';
 import * as nodePty from 'node-pty';
+
+const REPO_URL = 'https://github.com/jasontoo/afkode';
 
 const isWin = process.platform === 'win32';
 
@@ -150,6 +152,27 @@ export function createPty(win: BrowserWindow): void {
       }
     }
   });
+
+  ipcMain.on('app:open-bug-report', () => {
+    shell.openExternal(`${REPO_URL}/issues/new?template=bug_report.md&labels=bug`);
+  });
+
+  ipcMain.on('app:open-feature-request', () => {
+    shell.openExternal(`${REPO_URL}/issues/new?template=feature_request.md&labels=enhancement`);
+  });
+
+  ipcMain.handle('window:getBounds', () => {
+    if (targetWin && !targetWin.isDestroyed()) {
+      return targetWin.getBounds();
+    }
+    return { x: 0, y: 0, width: 800, height: 600 };
+  });
+
+  ipcMain.on('window:setBounds', (_event, bounds: { x: number; y: number; width: number; height: number }) => {
+    if (targetWin && !targetWin.isDestroyed()) {
+      targetWin.setBounds(bounds);
+    }
+  });
 }
 
 export function destroyPty(): void {
@@ -163,7 +186,11 @@ export function destroyPty(): void {
   ipcMain.removeAllListeners('pty:resize');
   ipcMain.removeAllListeners('pty:close');
   ipcMain.removeAllListeners('overlay:visibility');
+  ipcMain.removeAllListeners('app:open-bug-report');
+  ipcMain.removeAllListeners('app:open-feature-request');
+  ipcMain.removeAllListeners('window:setBounds');
   try { ipcMain.removeHandler('config:get'); } catch {}
   try { ipcMain.removeHandler('config:set'); } catch {}
   try { ipcMain.removeHandler('pty:create'); } catch {}
+  try { ipcMain.removeHandler('window:getBounds'); } catch {}
 }

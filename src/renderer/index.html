@@ -9,11 +9,20 @@
 </head>
 <body>
   <div id="overlay">
+    <div class="resize-handle rh-n" data-dir="n"></div>
+    <div class="resize-handle rh-s" data-dir="s"></div>
+    <div class="resize-handle rh-e" data-dir="e"></div>
+    <div class="resize-handle rh-w" data-dir="w"></div>
+    <div class="resize-handle rh-nw" data-dir="nw"></div>
+    <div class="resize-handle rh-ne" data-dir="ne"></div>
+    <div class="resize-handle rh-sw" data-dir="sw"></div>
+    <div class="resize-handle rh-se" data-dir="se"></div>
     <div id="titlebar">
       <div id="titlebar-left">
         <span id="titlebar-label">AFKode</span>
         <span id="connection-dot"></span>
       </div>
+      <div id="drag-spacer"></div>
       <div id="tab-bar">
         <div id="tabs"></div>
         <div id="new-tab-area">
@@ -23,6 +32,13 @@
         <div id="shell-picker" class="dropdown hidden"></div>
       </div>
       <div id="titlebar-right">
+        <button id="feedback-btn" title="Report Bug / Request Feature">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M12 16v-4"/>
+            <path d="M12 8h.01"/>
+          </svg>
+        </button>
         <button id="settings-btn" title="Settings">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="3"/>

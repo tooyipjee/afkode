@@ -1,11 +1,13 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { ipcMain } from 'electron';
+import { ipcMain, shell } from 'electron';
 import { spawn, getSpawnedInstances, clearSpawnedInstances } from 'node-pty';
 import { createPty, destroyPty } from '../../src/main/pty';
 
 const mockWindow = {
   isDestroyed: vi.fn(() => false),
   webContents: { send: vi.fn() },
+  getBounds: vi.fn(() => ({ x: 100, y: 100, width: 800, height: 600 })),
+  setBounds: vi.fn(),
 } as any;
 
 function getHandler(channel: string): Function {
@@ -48,6 +50,19 @@ describe('pty — registration', () => {
     expect(channels).toContain('pty:resize');
     expect(channels).toContain('pty:close');
     expect(channels).toContain('overlay:visibility');
+  });
+
+  it('registers window:getBounds handler', () => {
+    createPty(mockWindow);
+    expect(ipcMain.handle).toHaveBeenCalledWith('window:getBounds', expect.any(Function));
+  });
+
+  it('registers window:setBounds and bug report listeners', () => {
+    createPty(mockWindow);
+    const channels = (ipcMain.on as any).mock.calls.map((c: any) => c[0]);
+    expect(channels).toContain('window:setBounds');
+    expect(channels).toContain('app:open-bug-report');
+    expect(channels).toContain('app:open-feature-request');
   });
 });
 
@@ -522,6 +537,78 @@ describe('pty — spawn error handling', () => {
   });
 });
 
+describe('pty — window bounds', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    clearSpawnedInstances();
+    mockWindow.isDestroyed.mockReturnValue(false);
+    createPty(mockWindow);
+  });
+  afterEach(() => destroyPty());
+
+  it('window:getBounds returns current window bounds', () => {
+    const handler = getHandler('window:getBounds');
+    const bounds = handler();
+    expect(bounds).toEqual({ x: 100, y: 100, width: 800, height: 600 });
+    expect(mockWindow.getBounds).toHaveBeenCalled();
+  });
+
+  it('window:getBounds returns defaults when window is destroyed', () => {
+    mockWindow.isDestroyed.mockReturnValue(true);
+    const handler = getHandler('window:getBounds');
+    const bounds = handler();
+    expect(bounds).toEqual({ x: 0, y: 0, width: 800, height: 600 });
+    mockWindow.isDestroyed.mockReturnValue(false);
+  });
+
+  it('window:setBounds sets window bounds', () => {
+    const listener = getListener('window:setBounds');
+    const newBounds = { x: 200, y: 200, width: 1024, height: 768 };
+    listener({}, newBounds);
+    expect(mockWindow.setBounds).toHaveBeenCalledWith(newBounds);
+  });
+
+  it('window:setBounds does nothing when window is destroyed', () => {
+    mockWindow.isDestroyed.mockReturnValue(true);
+    const listener = getListener('window:setBounds');
+    listener({}, { x: 0, y: 0, width: 800, height: 600 });
+    expect(mockWindow.setBounds).not.toHaveBeenCalled();
+    mockWindow.isDestroyed.mockReturnValue(false);
+  });
+});
+
+describe('pty — feedback links', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    clearSpawnedInstances();
+    mockWindow.isDestroyed.mockReturnValue(false);
+    createPty(mockWindow);
+  });
+  afterEach(() => destroyPty());
+
+  it('app:open-bug-report opens GitHub bug report URL', () => {
+    const listener = getListener('app:open-bug-report');
+    listener({});
+    expect(shell.openExternal).toHaveBeenCalledWith(
+      expect.stringContaining('github.com/jasontoo/afkode/issues/new'),
+    );
+    expect(shell.openExternal).toHaveBeenCalledWith(
+      expect.stringContaining('labels=bug'),
+    );
+  });
+
+  it('app:open-feature-request opens GitHub feature request URL', () => {
+    const listener = getListener('app:open-feature-request');
+    listener({});
+    expect(shell.openExternal).toHaveBeenCalledWith(
+      expect.stringContaining('github.com/jasontoo/afkode/issues/new'),
+    );
+    expect(shell.openExternal).toHaveBeenCalledWith(
+      expect.stringContaining('labels=enhancement'),
+    );
+  });
+});
+
 describe('pty — destroyPty', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -548,9 +635,13 @@ describe('pty — destroyPty', () => {
     expect(ipcMain.removeAllListeners).toHaveBeenCalledWith('pty:resize');
     expect(ipcMain.removeAllListeners).toHaveBeenCalledWith('pty:close');
     expect(ipcMain.removeAllListeners).toHaveBeenCalledWith('overlay:visibility');
+    expect(ipcMain.removeAllListeners).toHaveBeenCalledWith('app:open-bug-report');
+    expect(ipcMain.removeAllListeners).toHaveBeenCalledWith('app:open-feature-request');
+    expect(ipcMain.removeAllListeners).toHaveBeenCalledWith('window:setBounds');
     expect(ipcMain.removeHandler).toHaveBeenCalledWith('config:get');
     expect(ipcMain.removeHandler).toHaveBeenCalledWith('config:set');
     expect(ipcMain.removeHandler).toHaveBeenCalledWith('pty:create');
+    expect(ipcMain.removeHandler).toHaveBeenCalledWith('window:getBounds');
   });
 
   it('is safe to call when no PTY exists', () => {

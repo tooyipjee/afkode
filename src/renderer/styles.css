@@ -38,6 +38,7 @@ html, body {
   transition: opacity 0.15s ease, transform 0.15s ease;
   opacity: 1;
   transform: translateY(0);
+  position: relative;
 }
 
 #overlay.hidden {
@@ -50,6 +51,41 @@ html, body {
   opacity: 1;
   transform: translateY(0);
   pointer-events: all;
+}
+
+/* --- Resize handles --- */
+
+.resize-handle {
+  position: absolute;
+  z-index: 1000;
+  -webkit-app-region: no-drag;
+}
+
+.rh-n  { top: 0; left: 10px; right: 10px; height: 4px; cursor: n-resize; }
+.rh-s  { bottom: 0; left: 10px; right: 10px; height: 4px; cursor: s-resize; }
+.rh-e  { right: 0; top: 10px; bottom: 10px; width: 4px; cursor: e-resize; }
+.rh-w  { left: 0; top: 10px; bottom: 10px; width: 4px; cursor: w-resize; }
+.rh-nw { top: 0; left: 0; width: 10px; height: 10px; cursor: nw-resize; }
+.rh-ne { top: 0; right: 0; width: 10px; height: 10px; cursor: ne-resize; }
+.rh-sw { bottom: 0; left: 0; width: 10px; height: 10px; cursor: sw-resize; }
+.rh-se { bottom: 0; right: 0; width: 14px; height: 14px; cursor: se-resize; }
+
+.rh-se::after {
+  content: '';
+  position: absolute;
+  right: 3px;
+  bottom: 3px;
+  width: 6px;
+  height: 6px;
+  border-right: 1.5px solid var(--fg-faint);
+  border-bottom: 1.5px solid var(--fg-faint);
+  opacity: 0.4;
+  border-radius: 0 0 2px 0;
+  transition: opacity 0.15s;
+}
+
+.rh-se:hover::after {
+  opacity: 0.8;
 }
 
 /* --- Titlebar --- */
@@ -71,6 +107,25 @@ html, body {
   align-items: center;
   gap: 6px;
   flex-shrink: 0;
+}
+
+#drag-spacer {
+  flex-shrink: 0;
+  width: 24px;
+  min-width: 16px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+}
+
+#drag-spacer::after {
+  content: '\u22EE\u22EE';
+  font-size: 8px;
+  letter-spacing: 1px;
+  color: var(--fg-faint);
+  opacity: 0.35;
 }
 
 #titlebar-label {
@@ -97,6 +152,7 @@ html, body {
   -webkit-app-region: no-drag;
 }
 
+#feedback-btn,
 #settings-btn {
   background: none;
   border: none;
@@ -110,6 +166,7 @@ html, body {
   transition: color 0.15s, background 0.15s;
 }
 
+#feedback-btn:hover,
 #settings-btn:hover {
   color: var(--fg);
   background: var(--tab-hover);

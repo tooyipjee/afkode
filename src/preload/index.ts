@@ -35,4 +35,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
   getConfig: () => ipcRenderer.invoke('config:get'),
   hideOverlay: () => ipcRenderer.send('overlay:dismiss'),
   notifyVisibility: (visible: boolean) => ipcRenderer.send('overlay:visibility', visible),
+  openBugReport: () => ipcRenderer.send('app:open-bug-report'),
+  openFeatureRequest: () => ipcRenderer.send('app:open-feature-request'),
+  getWindowBounds: (): Promise<{ x: number; y: number; width: number; height: number }> =>
+    ipcRenderer.invoke('window:getBounds'),
+  setWindowBounds: (bounds: { x: number; y: number; width: number; height: number }) =>
+    ipcRenderer.send('window:setBounds', bounds),
 });

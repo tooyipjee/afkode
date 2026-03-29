@@ -24,6 +24,10 @@ describe('preload — exposeInMainWorld', () => {
     expect(exposedApi.getConfig).toBeTypeOf('function');
     expect(exposedApi.hideOverlay).toBeTypeOf('function');
     expect(exposedApi.notifyVisibility).toBeTypeOf('function');
+    expect(exposedApi.openBugReport).toBeTypeOf('function');
+    expect(exposedApi.openFeatureRequest).toBeTypeOf('function');
+    expect(exposedApi.getWindowBounds).toBeTypeOf('function');
+    expect(exposedApi.setWindowBounds).toBeTypeOf('function');
   });
 });
 
@@ -83,6 +87,28 @@ describe('preload — IPC methods', () => {
 
     exposedApi.notifyVisibility(false);
     expect(ipcRenderer.send).toHaveBeenCalledWith('overlay:visibility', false);
+  });
+
+  it('openBugReport sends app:open-bug-report', () => {
+    exposedApi.openBugReport();
+    expect(ipcRenderer.send).toHaveBeenCalledWith('app:open-bug-report');
+  });
+
+  it('openFeatureRequest sends app:open-feature-request', () => {
+    exposedApi.openFeatureRequest();
+    expect(ipcRenderer.send).toHaveBeenCalledWith('app:open-feature-request');
+  });
+
+  it('getWindowBounds invokes window:getBounds', () => {
+    (ipcRenderer.invoke as any).mockResolvedValue({ x: 0, y: 0, width: 800, height: 600 });
+    exposedApi.getWindowBounds();
+    expect(ipcRenderer.invoke).toHaveBeenCalledWith('window:getBounds');
+  });
+
+  it('setWindowBounds sends window:setBounds', () => {
+    const bounds = { x: 100, y: 100, width: 1024, height: 768 };
+    exposedApi.setWindowBounds(bounds);
+    expect(ipcRenderer.send).toHaveBeenCalledWith('window:setBounds', bounds);
   });
 });
 
