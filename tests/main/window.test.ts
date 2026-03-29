@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { BrowserWindow, app, screen } from 'electron';
 import {
   createWindow, getWindow, toggleWindow, isWindowVisible,
-  sendToWindow, loadWindow,
+  sendToWindow, loadWindow, setForceQuit,
 } from '../../src/main/window';
 import { setConfig, getConfig } from '../../src/main/config';
 
@@ -125,6 +125,7 @@ describe('window — bounds validation', () => {
 describe('window — close handler', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    setForceQuit(false);
   });
 
   it('saves window bounds on close', () => {
@@ -134,11 +135,43 @@ describe('window — close handler', () => {
     const closeHandler = (win.on as any).mock.calls.find(
       (c: any) => c[0] === 'close',
     )[1];
-    closeHandler();
+    const mockEvent = { preventDefault: vi.fn() };
+    closeHandler(mockEvent);
 
     expect(win.getBounds).toHaveBeenCalled();
     const saved = getConfig('windowBounds');
     expect(saved).toEqual({ x: 50, y: 60, width: 900, height: 700 });
+    setConfig('windowBounds', null);
+  });
+
+  it('hides window instead of closing when forceQuit is false', () => {
+    const win = createWindow();
+    win.getBounds = vi.fn(() => ({ x: 0, y: 0, width: 800, height: 600 }));
+
+    const closeHandler = (win.on as any).mock.calls.find(
+      (c: any) => c[0] === 'close',
+    )[1];
+    const mockEvent = { preventDefault: vi.fn() };
+    closeHandler(mockEvent);
+
+    expect(mockEvent.preventDefault).toHaveBeenCalled();
+    expect(win.hide).toHaveBeenCalled();
+    setConfig('windowBounds', null);
+  });
+
+  it('allows close when forceQuit is true', () => {
+    setForceQuit(true);
+    const win = createWindow();
+    win.getBounds = vi.fn(() => ({ x: 0, y: 0, width: 800, height: 600 }));
+
+    const closeHandler = (win.on as any).mock.calls.find(
+      (c: any) => c[0] === 'close',
+    )[1];
+    const mockEvent = { preventDefault: vi.fn() };
+    closeHandler(mockEvent);
+
+    expect(mockEvent.preventDefault).not.toHaveBeenCalled();
+    setForceQuit(false);
     setConfig('windowBounds', null);
   });
 

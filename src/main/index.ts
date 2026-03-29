@@ -1,5 +1,5 @@
 import { app, BrowserWindow, ipcMain } from 'electron';
-import { createWindow, loadWindow, getWindow, sendToWindow } from './window';
+import { createWindow, loadWindow, getWindow, sendToWindow, setForceQuit } from './window';
 import { registerHotkey, unregisterAll } from './hotkey';
 import { createPty, destroyPty } from './pty';
 import { createTray, destroyTray } from './tray';
@@ -56,6 +56,10 @@ if (!gotLock) {
     createPty(win);
     registerHotkey();
     createTray();
+  });
+
+  app.on('before-quit', () => {
+    setForceQuit(true);
   });
 
   app.on('window-all-closed', () => {

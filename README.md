@@ -40,7 +40,7 @@ It's not a full IDE. It's a **zero-friction terminal** that sits on top of every
 | | |
 |---|---|
 | **Instant overlay** | Frameless, always-on-top, translucent. Appears over anything. |
-| **Global hotkey** | `Ctrl+\`` to toggle on all platforms. Same key to show and dismiss. |
+| **Global hotkey** | `Cmd+\`` (macOS) / `Ctrl+\`` (Win/Linux) to toggle. Same key to show and dismiss. |
 | **Tabs** | Multiple terminal sessions. `Cmd+T` / `Ctrl+Shift+T` for new tabs. |
 | **Shell picker** | Choose your shell — zsh, bash, PowerShell, Git Bash, WSL, fish. |
 | **Themes** | 5 built-in themes: AFKode, Dracula, Nord, One Dark, Solarized. |
@@ -81,7 +81,7 @@ Grab the latest from [**Releases**](https://github.com/tooyipjee/afkode/releases
 
 | Shortcut | Action |
 |---|---|
-| `Ctrl+\`` | Toggle overlay (show/hide) |
+| `Cmd+\`` / `Ctrl+\`` | Toggle overlay (show/hide) |
 | `Cmd+T` / `Ctrl+Shift+T` | New tab |
 | `Cmd+W` / `Ctrl+Shift+W` | Close tab |
 | `Ctrl+Tab` | Next tab |
@@ -90,7 +90,7 @@ Grab the latest from [**Releases**](https://github.com/tooyipjee/afkode/releases
 | `Cmd+,` / `Ctrl+,` | Open settings |
 | `Escape` | Close settings panel |
 
-> **Why `Ctrl+\`` instead of `Cmd+\``?** On macOS, `Cmd+\`` is the system shortcut for switching between windows of the same app. Using `Ctrl+\`` avoids stealing that from every app. Escape is left alone so it passes through to terminal apps like vim, Claude CLI, fzf, etc.
+> **Note:** `Escape` is left alone so it passes through to terminal apps like vim, Claude CLI, fzf, etc. The toggle hotkey is configurable in Settings.
 
 ## Settings
 

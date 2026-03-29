@@ -6,6 +6,11 @@ import { getIconPath } from './icon';
 const isMac = process.platform === 'darwin';
 
 let mainWindow: BrowserWindow | null = null;
+let forceQuit = false;
+
+export function setForceQuit(val: boolean): void {
+  forceQuit = val;
+}
 
 function validateBounds(
   x: number, y: number, w: number, h: number,
@@ -74,10 +79,14 @@ export function createWindow(): BrowserWindow {
 
   mainWindow.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
 
-  mainWindow.on('close', () => {
+  mainWindow.on('close', (e) => {
     if (mainWindow) {
       const bounds = mainWindow.getBounds();
       setConfig('windowBounds', bounds);
+    }
+    if (!forceQuit) {
+      e.preventDefault();
+      mainWindow?.hide();
     }
   });
 

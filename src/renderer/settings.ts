@@ -96,7 +96,7 @@ function buildSettingsContent(): void {
     <div class="shortcuts-section">
       <div class="settings-label" style="margin-bottom:6px">Keyboard Shortcuts</div>
       <div class="shortcut-grid">
-        <div class="shortcut-row"><kbd>Ctrl+\`</kbd><span>Toggle overlay</span></div>
+        <div class="shortcut-row"><kbd>${isMac ? '\u2318\`' : 'Ctrl+\`'}</kbd><span>Toggle overlay</span></div>
         <div class="shortcut-row"><kbd>Escape</kbd><span>Close settings</span></div>
         <div class="shortcut-row"><kbd>${isMac ? '\u2318T' : 'Ctrl+Shift+T'}</kbd><span>New tab</span></div>
         <div class="shortcut-row"><kbd>${isMac ? '\u2318W' : 'Ctrl+Shift+W'}</kbd><span>Close tab</span></div>
