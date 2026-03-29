@@ -7,6 +7,15 @@ const REPO_URL = 'https://github.com/jasontoo/afkode';
 
 const isWin = process.platform === 'win32';
 
+let cachedEnv: Record<string, string> | null = null;
+function getSpawnEnv(): Record<string, string> {
+  if (!cachedEnv) {
+    cachedEnv = { ...process.env as Record<string, string> };
+    if (!isWin) cachedEnv.TERM = 'xterm-256color';
+  }
+  return cachedEnv;
+}
+
 interface PtySession {
   process: ReturnType<typeof import('node-pty').spawn>;
   pendingData: string;
@@ -38,19 +47,12 @@ function spawnForTab(tabId: string, shellPath: string): void {
   const win = targetWin;
 
   try {
-    const env: Record<string, string> = {
-      ...process.env as Record<string, string>,
-    };
-    if (!isWin) {
-      env.TERM = 'xterm-256color';
-    }
-
     const ptyProcess = nodePty.spawn(shellPath, [], {
       name: 'xterm-256color',
       cols: 80,
       rows: 24,
       cwd: homedir(),
-      env,
+      env: getSpawnEnv(),
     });
 
     const session: PtySession = {

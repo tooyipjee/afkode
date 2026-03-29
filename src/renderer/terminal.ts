@@ -1,7 +1,5 @@
 import { Terminal } from '@xterm/xterm';
 import { FitAddon } from '@xterm/addon-fit';
-import { WebglAddon } from '@xterm/addon-webgl';
-import { Unicode11Addon } from '@xterm/addon-unicode11';
 import { getTheme } from './themes';
 
 interface TabTerminal {
@@ -15,6 +13,9 @@ const tabs = new Map<string, TabTerminal>();
 let activeTabId: string | null = null;
 let currentThemeId = 'afkode';
 let currentFontSize = 13;
+
+let resizeTimer: ReturnType<typeof setTimeout> | null = null;
+const RESIZE_THROTTLE_MS = 60;
 
 export function createTerminal(wrapper: HTMLElement, tabId: string): Terminal {
   const container = document.createElement('div');
@@ -32,7 +33,7 @@ export function createTerminal(wrapper: HTMLElement, tabId: string): Terminal {
     fontSize: currentFontSize,
     lineHeight: 1.2,
     allowTransparency: false,
-    scrollback: 10000,
+    scrollback: 5000,
     drawBoldTextInBrightColors: false,
     minimumContrastRatio: 1,
     theme: theme.terminal,
@@ -43,23 +44,7 @@ export function createTerminal(wrapper: HTMLElement, tabId: string): Terminal {
 
   terminal.open(container);
 
-  try {
-    const unicode11 = new Unicode11Addon();
-    terminal.loadAddon(unicode11);
-    terminal.unicode.activeVersion = '11';
-  } catch {
-    // Unicode 11 addon not available
-  }
-
-  try {
-    const webglAddon = new WebglAddon();
-    webglAddon.onContextLoss(() => {
-      webglAddon.dispose();
-    });
-    terminal.loadAddon(webglAddon);
-  } catch {
-    // WebGL not available, fall back to canvas
-  }
+  loadAddonsDeferred(terminal);
 
   fitAddon.fit();
 
@@ -67,14 +52,47 @@ export function createTerminal(wrapper: HTMLElement, tabId: string): Terminal {
     window.electronAPI.sendPtyInput(tabId, data);
   });
 
+  let lastCols = 0;
+  let lastRows = 0;
   terminal.onResize(({ cols, rows }) => {
-    window.electronAPI.sendPtyResize(tabId, cols, rows);
+    if (cols === lastCols && rows === lastRows) return;
+    lastCols = cols;
+    lastRows = rows;
+    if (resizeTimer) return;
+    resizeTimer = setTimeout(() => {
+      resizeTimer = null;
+      window.electronAPI.sendPtyResize(tabId, lastCols, lastRows);
+    }, RESIZE_THROTTLE_MS);
   });
 
   const tab: TabTerminal = { terminal, fitAddon, container, tabId };
   tabs.set(tabId, tab);
 
   return terminal;
+}
+
+function loadAddonsDeferred(terminal: Terminal): void {
+  const load = async () => {
+    try {
+      const { Unicode11Addon } = await import('@xterm/addon-unicode11');
+      const unicode11 = new Unicode11Addon();
+      terminal.loadAddon(unicode11);
+      terminal.unicode.activeVersion = '11';
+    } catch { /* not available */ }
+
+    try {
+      const { WebglAddon } = await import('@xterm/addon-webgl');
+      const webglAddon = new WebglAddon();
+      webglAddon.onContextLoss(() => webglAddon.dispose());
+      terminal.loadAddon(webglAddon);
+    } catch { /* WebGL not available, canvas fallback */ }
+  };
+
+  if (typeof requestIdleCallback !== 'undefined') {
+    requestIdleCallback(() => { load(); }, { timeout: 150 });
+  } else {
+    setTimeout(() => { load(); }, 50);
+  }
 }
 
 export function setInitialConfig(themeId: string, fontSize: number): void {

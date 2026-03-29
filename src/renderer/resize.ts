@@ -20,6 +20,17 @@ async function startResize(e: MouseEvent, dir: string): Promise<void> {
 
   document.body.style.cursor = `${dir}-resize`;
 
+  let pendingBounds: { x: number; y: number; width: number; height: number } | null = null;
+  let rafId = 0;
+
+  function flushBounds() {
+    rafId = 0;
+    if (pendingBounds) {
+      window.electronAPI.setWindowBounds(pendingBounds);
+      pendingBounds = null;
+    }
+  }
+
   function onMouseMove(ev: MouseEvent) {
     const dx = ev.screenX - startX;
     const dy = ev.screenY - startY;
@@ -40,18 +51,24 @@ async function startResize(e: MouseEvent, dir: string): Promise<void> {
       height = MIN_HEIGHT;
     }
 
-    window.electronAPI.setWindowBounds({
+    pendingBounds = {
       x: Math.round(x),
       y: Math.round(y),
       width: Math.round(width),
       height: Math.round(height),
-    });
+    };
+    if (!rafId) rafId = requestAnimationFrame(flushBounds);
   }
 
   function onMouseUp() {
     document.body.style.cursor = '';
     document.removeEventListener('mousemove', onMouseMove);
     document.removeEventListener('mouseup', onMouseUp);
+    if (rafId) cancelAnimationFrame(rafId);
+    if (pendingBounds) {
+      window.electronAPI.setWindowBounds(pendingBounds);
+      pendingBounds = null;
+    }
   }
 
   document.addEventListener('mousemove', onMouseMove);
