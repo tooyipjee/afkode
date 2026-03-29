@@ -18,6 +18,12 @@ describe('pty', () => {
     destroyPty();
   });
 
+  it('createPty registers config:set handler', () => {
+    createPty(mockWindow);
+    expect(ipcMain.handle).toHaveBeenCalledWith('config:set', expect.any(Function));
+    destroyPty();
+  });
+
   it('createPty registers pty:create handler', () => {
     createPty(mockWindow);
     expect(ipcMain.handle).toHaveBeenCalledWith('pty:create', expect.any(Function));
@@ -61,6 +67,8 @@ describe('pty', () => {
     expect(config).toHaveProperty('hotkey');
     expect(config).toHaveProperty('opacity');
     expect(config).toHaveProperty('shellPath');
+    expect(config).toHaveProperty('fontSize');
+    expect(config).toHaveProperty('theme');
     expect(config).toHaveProperty('platform');
     expect(config).toHaveProperty('availableShells');
     expect(config.platform).toBe(process.platform);

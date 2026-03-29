@@ -18,6 +18,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   sendPtyResize: (tabId: string, cols: number, rows: number) => {
     ipcRenderer.send('pty:resize', tabId, cols, rows);
   },
+  setConfig: (key: string, value: unknown): Promise<void> =>
+    ipcRenderer.invoke('config:set', key, value),
   onOverlayShow: (callback: () => void) => {
     ipcRenderer.removeAllListeners('overlay:show');
     ipcRenderer.on('overlay:show', () => callback());

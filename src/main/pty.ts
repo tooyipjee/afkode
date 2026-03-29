@@ -1,5 +1,5 @@
 import { BrowserWindow, ipcMain } from 'electron';
-import { getAllConfig, getConfig, getAvailableShells } from './config';
+import { getAllConfig, getConfig, setConfig, getAvailableShells } from './config';
 import { homedir } from 'os';
 
 const isWin = process.platform === 'win32';
@@ -106,6 +106,10 @@ export function createPty(win: BrowserWindow): void {
     availableShells: getAvailableShells(),
   }));
 
+  ipcMain.handle('config:set', (_event, key: string, value: unknown) => {
+    setConfig(key as any, value as any);
+  });
+
   ipcMain.handle('pty:create', (_event, shell?: string) => {
     const tabId = `tab-${nextId++}`;
     const shellPath = shell || getConfig('shellPath');
@@ -161,5 +165,6 @@ export function destroyPty(): void {
   ipcMain.removeAllListeners('pty:close');
   ipcMain.removeAllListeners('overlay:visibility');
   try { ipcMain.removeHandler('config:get'); } catch {}
+  try { ipcMain.removeHandler('config:set'); } catch {}
   try { ipcMain.removeHandler('pty:create'); } catch {}
 }

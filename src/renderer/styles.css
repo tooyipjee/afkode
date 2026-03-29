@@ -10,6 +10,8 @@
   --tab-bg: rgba(255, 255, 255, 0.04);
   --tab-active: rgba(255, 255, 255, 0.10);
   --tab-hover: rgba(255, 255, 255, 0.07);
+  --ctrl-bg: rgba(255, 255, 255, 0.06);
+  --ctrl-border: rgba(255, 255, 255, 0.1);
 }
 
 * {
@@ -89,8 +91,28 @@ html, body {
 #titlebar-right {
   display: flex;
   align-items: center;
+  gap: 8px;
   flex-shrink: 0;
   margin-left: auto;
+  -webkit-app-region: no-drag;
+}
+
+#settings-btn {
+  background: none;
+  border: none;
+  color: var(--fg-faint);
+  cursor: pointer;
+  padding: 3px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s, background 0.15s;
+}
+
+#settings-btn:hover {
+  color: var(--fg);
+  background: var(--tab-hover);
 }
 
 #hotkey-hint {
@@ -226,7 +248,7 @@ html, body {
   left: 0;
   margin-top: 4px;
   background: rgba(30, 30, 40, 0.98);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--ctrl-border);
   border-radius: 6px;
   padding: 4px 0;
   min-width: 160px;
@@ -254,6 +276,214 @@ html, body {
 
 .dropdown-item.current {
   color: #4ade80;
+}
+
+/* --- Settings panel --- */
+
+#settings-panel {
+  flex-shrink: 0;
+  overflow: hidden;
+  max-height: 400px;
+  padding: 10px 16px 12px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(0, 0, 0, 0.25);
+  transition: max-height 0.2s ease, padding 0.2s ease, opacity 0.15s ease;
+  opacity: 1;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+#settings-panel.hidden {
+  max-height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  opacity: 0;
+  border-bottom-color: transparent;
+}
+
+.settings-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 20px;
+}
+
+.settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 26px;
+}
+
+.settings-label {
+  font-size: 11px;
+  color: var(--fg-muted);
+  white-space: nowrap;
+}
+
+.settings-select {
+  background: var(--ctrl-bg);
+  border: 1px solid var(--ctrl-border);
+  color: var(--fg);
+  font-size: 11px;
+  padding: 3px 6px;
+  border-radius: 4px;
+  outline: none;
+  min-width: 0;
+  max-width: 140px;
+  font-family: inherit;
+}
+
+.settings-select:focus {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.settings-select option {
+  background: #1e1e2e;
+  color: var(--fg);
+}
+
+/* --- Stepper --- */
+
+.settings-stepper {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  border: 1px solid var(--ctrl-border);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.stepper-btn {
+  background: var(--ctrl-bg);
+  border: none;
+  color: var(--fg-muted);
+  font-size: 13px;
+  padding: 2px 8px;
+  cursor: pointer;
+  transition: background 0.1s, color 0.1s;
+  line-height: 1;
+}
+
+.stepper-btn:hover {
+  background: var(--tab-hover);
+  color: var(--fg);
+}
+
+.stepper-val {
+  font-size: 11px;
+  color: var(--fg);
+  min-width: 24px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- Theme swatches --- */
+
+.theme-swatches {
+  display: flex;
+  gap: 5px;
+}
+
+.theme-swatch {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: border-color 0.15s, transform 0.1s;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+}
+
+.theme-swatch:hover {
+  transform: scale(1.15);
+}
+
+.theme-swatch.active {
+  border-color: #4ade80;
+}
+
+/* --- Slider --- */
+
+.settings-slider-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  max-width: 160px;
+}
+
+.settings-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  flex: 1;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--ctrl-bg);
+  outline: none;
+}
+
+.settings-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--fg);
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+.slider-val {
+  font-size: 10px;
+  color: var(--fg-faint);
+  min-width: 28px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- Divider --- */
+
+.settings-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 8px 0;
+}
+
+/* --- Shortcuts --- */
+
+.shortcuts-section {
+  padding-top: 2px;
+}
+
+.shortcut-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3px 16px;
+}
+
+.shortcut-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.shortcut-row kbd {
+  font-family: 'SF Mono', 'Cascadia Code', Menlo, Consolas, monospace;
+  font-size: 9.5px;
+  color: var(--fg-muted);
+  background: var(--ctrl-bg);
+  border: 1px solid var(--ctrl-border);
+  border-radius: 3px;
+  padding: 1px 4px;
+  min-width: 44px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.shortcut-row span {
+  font-size: 10px;
+  color: var(--fg-faint);
+  white-space: nowrap;
 }
 
 /* --- Terminal --- */

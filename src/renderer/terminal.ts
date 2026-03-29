@@ -2,6 +2,7 @@ import { Terminal } from '@xterm/xterm';
 import { FitAddon } from '@xterm/addon-fit';
 import { WebglAddon } from '@xterm/addon-webgl';
 import { Unicode11Addon } from '@xterm/addon-unicode11';
+import { getTheme } from './themes';
 
 interface TabTerminal {
   terminal: Terminal;
@@ -12,31 +13,8 @@ interface TabTerminal {
 
 const tabs = new Map<string, TabTerminal>();
 let activeTabId: string | null = null;
-
-const TERM_THEME = {
-  background: '#121218',
-  foreground: '#d4d4d8',
-  cursor: '#d4d4d8',
-  cursorAccent: '#121218',
-  selectionBackground: 'rgba(255, 255, 255, 0.15)',
-  selectionForeground: '#ffffff',
-  black: '#27272a',
-  red: '#f87171',
-  green: '#4ade80',
-  yellow: '#facc15',
-  blue: '#60a5fa',
-  magenta: '#c084fc',
-  cyan: '#22d3ee',
-  white: '#d4d4d8',
-  brightBlack: '#52525b',
-  brightRed: '#fca5a5',
-  brightGreen: '#86efac',
-  brightYellow: '#fde047',
-  brightBlue: '#93c5fd',
-  brightMagenta: '#d8b4fe',
-  brightCyan: '#67e8f9',
-  brightWhite: '#fafafa',
-};
+let currentThemeId = 'afkode';
+let currentFontSize = 13;
 
 export function createTerminal(wrapper: HTMLElement, tabId: string): Terminal {
   const container = document.createElement('div');
@@ -45,17 +23,19 @@ export function createTerminal(wrapper: HTMLElement, tabId: string): Terminal {
   container.style.display = 'none';
   wrapper.appendChild(container);
 
+  const theme = getTheme(currentThemeId);
+
   const terminal = new Terminal({
     cursorBlink: true,
     cursorStyle: 'bar',
     fontFamily: '"Cascadia Code", "SF Mono", "Fira Code", "JetBrains Mono", Consolas, Menlo, "Courier New", monospace',
-    fontSize: 13,
+    fontSize: currentFontSize,
     lineHeight: 1.2,
     allowTransparency: false,
     scrollback: 10000,
     drawBoldTextInBrightColors: false,
     minimumContrastRatio: 1,
-    theme: TERM_THEME,
+    theme: theme.terminal,
   });
 
   const fitAddon = new FitAddon();
@@ -95,6 +75,11 @@ export function createTerminal(wrapper: HTMLElement, tabId: string): Terminal {
   tabs.set(tabId, tab);
 
   return terminal;
+}
+
+export function setInitialConfig(themeId: string, fontSize: number): void {
+  currentThemeId = themeId;
+  currentFontSize = fontSize;
 }
 
 export function activateTab(tabId: string): void {
@@ -175,4 +160,19 @@ export function getAllTabIds(): string[] {
 
 export function getTerminalForTab(tabId: string): Terminal | null {
   return tabs.get(tabId)?.terminal ?? null;
+}
+
+export function applyThemeToAll(themeColors: Record<string, string>): void {
+  currentThemeId = Object.keys(themeColors).length > 0 ? currentThemeId : 'afkode';
+  for (const [, tab] of tabs) {
+    tab.terminal.options.theme = themeColors;
+  }
+}
+
+export function setFontSizeAll(size: number): void {
+  currentFontSize = size;
+  for (const [, tab] of tabs) {
+    tab.terminal.options.fontSize = size;
+    tab.fitAddon.fit();
+  }
 }

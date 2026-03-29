@@ -74,11 +74,15 @@ export function getAvailableShells(): Array<{ path: string; name: string }> {
   return shells;
 }
 
+const VALID_THEMES = ['afkode', 'dracula', 'nord', 'one-dark', 'solarized'];
+
 interface OverlayConfig {
   hotkey: string;
   opacity: number;
   shellPath: string;
   windowBounds: { x: number; y: number; width: number; height: number } | null;
+  fontSize: number;
+  theme: string;
 }
 
 const defaults: OverlayConfig = {
@@ -86,6 +90,8 @@ const defaults: OverlayConfig = {
   opacity: 0.95,
   shellPath: defaultShell(),
   windowBounds: null,
+  fontSize: 13,
+  theme: 'afkode',
 };
 
 let store: Store<OverlayConfig>;
@@ -110,6 +116,14 @@ export function getConfig<K extends keyof OverlayConfig>(key: K): OverlayConfig[
     const s = val as string;
     if (typeof s !== 'string' || !isValidShell(s)) return defaults.shellPath as OverlayConfig[K];
   }
+  if (key === 'fontSize') {
+    const n = val as number;
+    if (typeof n !== 'number' || isNaN(n) || n < 8 || n > 28) return defaults.fontSize as OverlayConfig[K];
+  }
+  if (key === 'theme') {
+    const s = val as string;
+    if (typeof s !== 'string' || !VALID_THEMES.includes(s)) return defaults.theme as OverlayConfig[K];
+  }
   return val;
 }
 
@@ -123,6 +137,8 @@ export function getAllConfig(): OverlayConfig {
     opacity: getConfig('opacity'),
     shellPath: getConfig('shellPath'),
     windowBounds: getConfig('windowBounds'),
+    fontSize: getConfig('fontSize'),
+    theme: getConfig('theme'),
   };
 }
 

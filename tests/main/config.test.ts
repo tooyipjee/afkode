@@ -10,6 +10,14 @@ describe('config', () => {
     expect(getConfig('opacity')).toBe(0.95);
   });
 
+  it('returns default fontSize', () => {
+    expect(getConfig('fontSize')).toBe(13);
+  });
+
+  it('returns default theme', () => {
+    expect(getConfig('theme')).toBe('afkode');
+  });
+
   it('returns a shell path', () => {
     const shell = getConfig('shellPath');
     expect(typeof shell).toBe('string');
@@ -26,6 +34,18 @@ describe('config', () => {
     setConfig('opacity', 0.95);
   });
 
+  it('setConfig persists fontSize', () => {
+    setConfig('fontSize', 16);
+    expect(getConfig('fontSize')).toBe(16);
+    setConfig('fontSize', 13);
+  });
+
+  it('setConfig persists theme', () => {
+    setConfig('theme', 'dracula');
+    expect(getConfig('theme')).toBe('dracula');
+    setConfig('theme', 'afkode');
+  });
+
   it('setConfig persists windowBounds', () => {
     const bounds = { x: 100, y: 200, width: 800, height: 600 };
     setConfig('windowBounds', bounds);
@@ -39,6 +59,8 @@ describe('config', () => {
     expect(config).toHaveProperty('opacity');
     expect(config).toHaveProperty('shellPath');
     expect(config).toHaveProperty('windowBounds');
+    expect(config).toHaveProperty('fontSize');
+    expect(config).toHaveProperty('theme');
   });
 
   it('validates opacity — returns default for invalid values', () => {
@@ -51,6 +73,20 @@ describe('config', () => {
     setConfig('hotkey', '' as any);
     expect(getConfig('hotkey')).toBe(defaults.hotkey);
     setConfig('hotkey', 'CommandOrControl+`');
+  });
+
+  it('validates fontSize — returns default for out of range', () => {
+    setConfig('fontSize', 2 as any);
+    expect(getConfig('fontSize')).toBe(defaults.fontSize);
+    setConfig('fontSize', 50 as any);
+    expect(getConfig('fontSize')).toBe(defaults.fontSize);
+    setConfig('fontSize', 13);
+  });
+
+  it('validates theme — returns default for unknown theme', () => {
+    setConfig('theme', 'nonexistent' as any);
+    expect(getConfig('theme')).toBe(defaults.theme);
+    setConfig('theme', 'afkode');
   });
 
   it('shellPath defaults appropriately for platform', () => {

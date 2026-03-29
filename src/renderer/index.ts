@@ -1,7 +1,9 @@
 import '@xterm/xterm/css/xterm.css';
-import { focusTerminal, writeToTab } from './terminal';
+import { focusTerminal, writeToTab, setInitialConfig } from './terminal';
 import { setupOverlayEvents } from './overlay';
 import { initTabs, addTab, handlePtyExit } from './tabs';
+import { initSettings, toggleSettings } from './settings';
+import { getTheme } from './themes';
 
 declare global {
   interface Window {
@@ -12,6 +14,7 @@ declare global {
       closePtyTab: (tabId: string) => void;
       sendPtyInput: (tabId: string, data: string) => void;
       sendPtyResize: (tabId: string, cols: number, rows: number) => void;
+      setConfig: (key: string, value: unknown) => Promise<void>;
       onOverlayShow: (callback: () => void) => void;
       onOverlayHide: (callback: () => void) => void;
       onConfigUpdate: (callback: (config: Record<string, unknown>) => void) => void;
@@ -25,9 +28,14 @@ declare global {
 async function init() {
   const config = await window.electronAPI.getConfig();
   const opacity = (config.opacity as number) || 0.95;
+  const themeId = (config.theme as string) || 'afkode';
+  const fontSize = (config.fontSize as number) || 13;
+  const theme = getTheme(themeId);
 
   document.documentElement.style.setProperty('--opacity', String(opacity));
-  document.documentElement.style.setProperty('--bg', `rgba(18, 18, 24, ${opacity})`);
+  document.documentElement.style.setProperty('--bg', theme.overlayBg(opacity));
+
+  setInitialConfig(themeId, fontSize);
 
   const wrapper = document.getElementById('terminal-wrapper');
   const tabsContainer = document.getElementById('tabs');
@@ -37,6 +45,7 @@ async function init() {
   const defaultShell = (config.shellPath as string) || '';
 
   initTabs(wrapper, tabsContainer, shells, defaultShell);
+  initSettings(config);
   setupOverlayEvents();
 
   window.electronAPI.onPtyData((tabId, data) => {
@@ -47,10 +56,8 @@ async function init() {
     handlePtyExit(tabId);
   });
 
-  const newTabBtn = document.getElementById('new-tab-btn');
-  if (newTabBtn) {
-    newTabBtn.addEventListener('click', () => addTab());
-  }
+  document.getElementById('new-tab-btn')?.addEventListener('click', () => addTab());
+  document.getElementById('settings-btn')?.addEventListener('click', () => toggleSettings());
 
   await addTab();
   focusTerminal();
@@ -69,8 +76,9 @@ async function init() {
   window.electronAPI.onConfigUpdate((update) => {
     if (update.opacity !== undefined) {
       const val = update.opacity as number;
+      const t = getTheme((config.theme as string) || 'afkode');
       document.documentElement.style.setProperty('--opacity', String(val));
-      document.documentElement.style.setProperty('--bg', `rgba(18, 18, 24, ${val})`);
+      document.documentElement.style.setProperty('--bg', t.overlayBg(val));
     }
   });
 }

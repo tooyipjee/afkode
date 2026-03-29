@@ -1,6 +1,7 @@
 import { fitTerminal, focusTerminal, setCursorBlink } from './terminal';
-import { addTab, closeTab, switchToNextTab, switchToPrevTab, switchToTabIndex, getTabCount } from './tabs';
+import { addTab, closeTab, switchToNextTab, switchToPrevTab, switchToTabIndex } from './tabs';
 import { getActiveTabId } from './terminal';
+import { toggleSettings, isSettingsOpen, closeSettings } from './settings';
 import type { Terminal } from '@xterm/xterm';
 
 let visible = false;
@@ -30,6 +31,7 @@ export function setupOverlayEvents(): void {
     visible = false;
     setCursorBlink(false);
     window.electronAPI.notifyVisibility(false);
+    if (isSettingsOpen()) closeSettings();
   });
 
   const wrapper = document.getElementById('terminal-wrapper');
@@ -52,13 +54,23 @@ export function attachTerminalKeyHandler(terminal: Terminal): void {
   terminal.attachCustomKeyEventHandler((e) => {
     if (e.type !== 'keydown') return true;
 
+    const mod = isMac ? e.metaKey : e.ctrlKey;
+    const shift = e.shiftKey;
+
     if (e.key === 'Escape') {
+      if (isSettingsOpen()) {
+        closeSettings();
+        return false;
+      }
       window.electronAPI.hideOverlay();
       return false;
     }
 
-    const mod = isMac ? e.metaKey : e.ctrlKey;
-    const shift = e.shiftKey;
+    // Settings: Cmd+, (Mac) or Ctrl+, (Win/Linux)
+    if (mod && e.key === ',') {
+      toggleSettings();
+      return false;
+    }
 
     // New tab: Cmd+T (Mac) or Ctrl+Shift+T (Win/Linux)
     if (e.key.toLowerCase() === 't' && mod && (isMac ? !shift : shift)) {
