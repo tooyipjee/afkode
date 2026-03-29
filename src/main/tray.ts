@@ -1,6 +1,6 @@
 import { Tray, Menu, app } from 'electron';
 import { getWindow, toggleWindow, sendToWindow } from './window';
-import { getConfig, setConfig } from './config';
+import { getConfig, setConfig, getAvailableShells } from './config';
 import { getTrayIcon } from './icon';
 
 let tray: Tray | null = null;
@@ -16,6 +16,8 @@ function updateTrayMenu(): void {
 
   const opacity = getConfig('opacity');
   const hotkey = getConfig('hotkey');
+  const currentShell = getConfig('shellPath');
+  const shells = getAvailableShells();
 
   const contextMenu = Menu.buildFromTemplate([
     {
@@ -30,6 +32,17 @@ function updateTrayMenu(): void {
       },
     },
     { type: 'separator' },
+    {
+      label: 'Default Shell',
+      submenu: shells.map((shell) => ({
+        label: shell.name,
+        type: 'radio' as const,
+        checked: currentShell === shell.path,
+        click: () => {
+          setConfig('shellPath', shell.path);
+        },
+      })),
+    },
     {
       label: 'Opacity',
       submenu: [0.6, 0.7, 0.8, 0.85, 0.9, 0.95, 1.0].map((val) => ({

@@ -1,15 +1,22 @@
 import { contextBridge, ipcRenderer } from 'electron';
 
 contextBridge.exposeInMainWorld('electronAPI', {
-  onPtyData: (callback: (data: string) => void) => {
+  onPtyData: (callback: (tabId: string, data: string) => void) => {
     ipcRenderer.removeAllListeners('pty:data');
-    ipcRenderer.on('pty:data', (_event, data: string) => callback(data));
+    ipcRenderer.on('pty:data', (_event, tabId: string, data: string) => callback(tabId, data));
   },
-  sendPtyInput: (data: string) => {
-    ipcRenderer.send('pty:input', data);
+  onPtyExit: (callback: (tabId: string, exitCode: number) => void) => {
+    ipcRenderer.removeAllListeners('pty:exit');
+    ipcRenderer.on('pty:exit', (_event, tabId: string, exitCode: number) => callback(tabId, exitCode));
   },
-  sendPtyResize: (cols: number, rows: number) => {
-    ipcRenderer.send('pty:resize', cols, rows);
+  createPtyTab: (shell?: string): Promise<{ tabId: string; shell: string; shellName: string }> =>
+    ipcRenderer.invoke('pty:create', shell),
+  closePtyTab: (tabId: string) => ipcRenderer.send('pty:close', tabId),
+  sendPtyInput: (tabId: string, data: string) => {
+    ipcRenderer.send('pty:input', tabId, data);
+  },
+  sendPtyResize: (tabId: string, cols: number, rows: number) => {
+    ipcRenderer.send('pty:resize', tabId, cols, rows);
   },
   onOverlayShow: (callback: () => void) => {
     ipcRenderer.removeAllListeners('overlay:show');

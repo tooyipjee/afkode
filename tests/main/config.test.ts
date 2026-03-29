@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getConfig, setConfig, getAllConfig, isValidShell, defaults } from '../../src/main/config';
+import { getConfig, setConfig, getAllConfig, isValidShell, getAvailableShells, defaults } from '../../src/main/config';
 
 describe('config', () => {
   it('returns default hotkey', () => {
@@ -80,5 +80,31 @@ describe('isValidShell', () => {
     if (process.platform !== 'win32') {
       expect(isValidShell('/nonexistent/shell')).toBe(false);
     }
+  });
+});
+
+describe('getAvailableShells', () => {
+  it('returns a non-empty array', () => {
+    const shells = getAvailableShells();
+    expect(Array.isArray(shells)).toBe(true);
+    expect(shells.length).toBeGreaterThan(0);
+  });
+
+  it('each shell has path and name properties', () => {
+    const shells = getAvailableShells();
+    for (const shell of shells) {
+      expect(shell).toHaveProperty('path');
+      expect(shell).toHaveProperty('name');
+      expect(typeof shell.path).toBe('string');
+      expect(typeof shell.name).toBe('string');
+      expect(shell.path.length).toBeGreaterThan(0);
+      expect(shell.name.length).toBeGreaterThan(0);
+    }
+  });
+
+  it('does not contain duplicate paths', () => {
+    const shells = getAvailableShells();
+    const paths = shells.map((s) => s.path);
+    expect(new Set(paths).size).toBe(paths.length);
   });
 });

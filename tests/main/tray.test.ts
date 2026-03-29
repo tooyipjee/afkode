@@ -26,13 +26,14 @@ describe('tray', () => {
     destroyTray();
   });
 
-  it('context menu includes toggle, opacity, and quit', () => {
+  it('context menu includes toggle, default shell, opacity, and quit', () => {
     createTray();
     const template = (Menu.buildFromTemplate as any).mock.calls[0][0];
     const labels = template
       .filter((item: any) => item.label)
       .map((item: any) => item.label);
     expect(labels).toContain('Toggle Overlay');
+    expect(labels).toContain('Default Shell');
     expect(labels).toContain('Opacity');
     expect(labels).toContain('Quit');
     destroyTray();
@@ -47,6 +48,20 @@ describe('tray', () => {
     expect(labels).toContain('60%');
     expect(labels).toContain('95%');
     expect(labels).toContain('100%');
+    destroyTray();
+  });
+
+  it('default shell submenu contains available shells', () => {
+    createTray();
+    const template = (Menu.buildFromTemplate as any).mock.calls[0][0];
+    const shellItem = template.find((item: any) => item.label === 'Default Shell');
+    expect(shellItem.submenu).toBeDefined();
+    expect(Array.isArray(shellItem.submenu)).toBe(true);
+    expect(shellItem.submenu.length).toBeGreaterThan(0);
+    for (const item of shellItem.submenu) {
+      expect(item).toHaveProperty('label');
+      expect(item).toHaveProperty('type', 'radio');
+    }
     destroyTray();
   });
 

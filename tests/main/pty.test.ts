@@ -18,6 +18,12 @@ describe('pty', () => {
     destroyPty();
   });
 
+  it('createPty registers pty:create handler', () => {
+    createPty(mockWindow);
+    expect(ipcMain.handle).toHaveBeenCalledWith('pty:create', expect.any(Function));
+    destroyPty();
+  });
+
   it('createPty registers pty:input listener', () => {
     createPty(mockWindow);
     const channels = (ipcMain.on as any).mock.calls.map((c: any) => c[0]);
@@ -32,6 +38,13 @@ describe('pty', () => {
     destroyPty();
   });
 
+  it('createPty registers pty:close listener', () => {
+    createPty(mockWindow);
+    const channels = (ipcMain.on as any).mock.calls.map((c: any) => c[0]);
+    expect(channels).toContain('pty:close');
+    destroyPty();
+  });
+
   it('createPty registers overlay:visibility listener', () => {
     createPty(mockWindow);
     const channels = (ipcMain.on as any).mock.calls.map((c: any) => c[0]);
@@ -39,7 +52,7 @@ describe('pty', () => {
     destroyPty();
   });
 
-  it('config:get handler returns config with platform', () => {
+  it('config:get handler returns config with platform and availableShells', () => {
     createPty(mockWindow);
     const handler = (ipcMain.handle as any).mock.calls.find(
       (c: any) => c[0] === 'config:get',
@@ -49,7 +62,22 @@ describe('pty', () => {
     expect(config).toHaveProperty('opacity');
     expect(config).toHaveProperty('shellPath');
     expect(config).toHaveProperty('platform');
+    expect(config).toHaveProperty('availableShells');
     expect(config.platform).toBe(process.platform);
+    expect(Array.isArray(config.availableShells)).toBe(true);
+    destroyPty();
+  });
+
+  it('pty:create handler returns tabId and shell info', () => {
+    createPty(mockWindow);
+    const handler = (ipcMain.handle as any).mock.calls.find(
+      (c: any) => c[0] === 'pty:create',
+    )[1];
+    const result = handler({});
+    expect(result).toHaveProperty('tabId');
+    expect(result).toHaveProperty('shell');
+    expect(result).toHaveProperty('shellName');
+    expect(result.tabId).toMatch(/^tab-/);
     destroyPty();
   });
 
@@ -58,9 +86,9 @@ describe('pty', () => {
     const resizeHandler = (ipcMain.on as any).mock.calls.find(
       (c: any) => c[0] === 'pty:resize',
     )[1];
-    expect(() => resizeHandler({}, 'bad', 'data')).not.toThrow();
-    expect(() => resizeHandler({}, -1, 10)).not.toThrow();
-    expect(() => resizeHandler({}, 999, 10)).not.toThrow();
+    expect(() => resizeHandler({}, 'tab-1', 'bad', 'data')).not.toThrow();
+    expect(() => resizeHandler({}, 'tab-1', -1, 10)).not.toThrow();
+    expect(() => resizeHandler({}, 'tab-1', 999, 10)).not.toThrow();
     destroyPty();
   });
 
@@ -69,6 +97,7 @@ describe('pty', () => {
     destroyPty();
     expect(ipcMain.removeAllListeners).toHaveBeenCalledWith('pty:input');
     expect(ipcMain.removeAllListeners).toHaveBeenCalledWith('pty:resize');
+    expect(ipcMain.removeAllListeners).toHaveBeenCalledWith('pty:close');
     expect(ipcMain.removeAllListeners).toHaveBeenCalledWith('overlay:visibility');
   });
 

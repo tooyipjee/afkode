@@ -9,7 +9,7 @@ function defaultShell(): string {
 }
 
 const ALLOWED_SHELLS_UNIX = ['/bin/sh', '/bin/bash', '/bin/zsh', '/bin/fish', '/usr/bin/fish', '/usr/local/bin/bash', '/usr/local/bin/zsh', '/usr/local/bin/fish', '/opt/homebrew/bin/bash', '/opt/homebrew/bin/zsh', '/opt/homebrew/bin/fish'];
-const ALLOWED_SHELLS_WIN = ['cmd.exe', 'powershell.exe', 'pwsh.exe'];
+const ALLOWED_SHELLS_WIN = ['cmd.exe', 'powershell.exe', 'pwsh.exe', 'bash.exe', 'wsl.exe'];
 
 export function isValidShell(shell: string): boolean {
   if (process.platform === 'win32') {
@@ -17,6 +17,61 @@ export function isValidShell(shell: string): boolean {
     return ALLOWED_SHELLS_WIN.includes(name);
   }
   return ALLOWED_SHELLS_UNIX.includes(shell) || existsSync(shell);
+}
+
+export function getAvailableShells(): Array<{ path: string; name: string }> {
+  if (process.platform === 'win32') {
+    const shells: Array<{ path: string; name: string }> = [];
+    const comspec = process.env.COMSPEC || 'C:\\Windows\\System32\\cmd.exe';
+    shells.push({ path: comspec, name: 'Command Prompt' });
+
+    const psPath = 'C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe';
+    if (existsSync(psPath)) {
+      shells.push({ path: psPath, name: 'Windows PowerShell' });
+    }
+
+    for (const p of [
+      'C:\\Program Files\\PowerShell\\7\\pwsh.exe',
+      'C:\\Program Files (x86)\\PowerShell\\7\\pwsh.exe',
+    ]) {
+      if (existsSync(p)) { shells.push({ path: p, name: 'PowerShell 7' }); break; }
+    }
+
+    for (const p of [
+      'C:\\Program Files\\Git\\bin\\bash.exe',
+      'C:\\Program Files (x86)\\Git\\bin\\bash.exe',
+    ]) {
+      if (existsSync(p)) { shells.push({ path: p, name: 'Git Bash' }); break; }
+    }
+
+    if (existsSync('C:\\Windows\\System32\\wsl.exe')) {
+      shells.push({ path: 'C:\\Windows\\System32\\wsl.exe', name: 'WSL' });
+    }
+
+    return shells;
+  }
+
+  const shells: Array<{ path: string; name: string }> = [];
+  const seen = new Set<string>();
+  for (const c of [
+    { path: '/bin/zsh', name: 'Zsh' },
+    { path: '/bin/bash', name: 'Bash' },
+    { path: '/bin/sh', name: 'sh' },
+    { path: '/bin/fish', name: 'Fish' },
+    { path: '/usr/bin/fish', name: 'Fish' },
+    { path: '/usr/local/bin/bash', name: 'Bash' },
+    { path: '/usr/local/bin/zsh', name: 'Zsh' },
+    { path: '/usr/local/bin/fish', name: 'Fish' },
+    { path: '/opt/homebrew/bin/bash', name: 'Bash' },
+    { path: '/opt/homebrew/bin/zsh', name: 'Zsh' },
+    { path: '/opt/homebrew/bin/fish', name: 'Fish' },
+  ]) {
+    if (existsSync(c.path) && !seen.has(c.path)) {
+      seen.add(c.path);
+      shells.push(c);
+    }
+  }
+  return shells;
 }
 
 interface OverlayConfig {

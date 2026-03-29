@@ -7,6 +7,9 @@
   --border: rgba(255, 255, 255, 0.07);
   --titlebar-height: 34px;
   --radius: 10px;
+  --tab-bg: rgba(255, 255, 255, 0.04);
+  --tab-active: rgba(255, 255, 255, 0.10);
+  --tab-hover: rgba(255, 255, 255, 0.07);
 }
 
 * {
@@ -53,18 +56,19 @@ html, body {
   height: var(--titlebar-height);
   display: flex;
   align-items: center;
-  justify-content: space-between;
   padding: 0 12px;
   -webkit-app-region: drag;
   user-select: none;
   flex-shrink: 0;
   border-bottom: 1px solid var(--border);
+  gap: 8px;
 }
 
 #titlebar-left {
   display: flex;
   align-items: center;
   gap: 6px;
+  flex-shrink: 0;
 }
 
 #titlebar-label {
@@ -85,27 +89,193 @@ html, body {
 #titlebar-right {
   display: flex;
   align-items: center;
+  flex-shrink: 0;
+  margin-left: auto;
 }
 
 #hotkey-hint {
-  font-family: 'SF Mono', Menlo, monospace;
+  font-family: 'SF Mono', 'Cascadia Code', Menlo, Consolas, monospace;
   font-size: 10px;
   color: var(--fg-faint);
 }
 
+/* --- Tab bar --- */
+
+#tab-bar {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+  -webkit-app-region: no-drag;
+  position: relative;
+}
+
+#tabs {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  min-width: 0;
+  scrollbar-width: none;
+}
+
+#tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.tab {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 5px;
+  background: var(--tab-bg);
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background 0.1s ease;
+  max-width: 140px;
+}
+
+.tab:hover {
+  background: var(--tab-hover);
+}
+
+.tab.active {
+  background: var(--tab-active);
+}
+
+.tab-label {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 10.5px;
+  color: var(--fg-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tab.active .tab-label {
+  color: var(--fg);
+}
+
+.tab-close {
+  background: none;
+  border: none;
+  color: var(--fg-faint);
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 1px;
+  border-radius: 3px;
+  opacity: 0;
+  transition: opacity 0.1s, color 0.1s;
+}
+
+.tab:hover .tab-close,
+.tab.active .tab-close {
+  opacity: 1;
+}
+
+.tab-close:hover {
+  color: var(--fg);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* --- New tab area --- */
+
+#new-tab-area {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+#new-tab-btn,
+#shell-picker-btn {
+  background: none;
+  border: none;
+  color: var(--fg-faint);
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background 0.1s, color 0.1s;
+}
+
+#new-tab-btn {
+  font-size: 15px;
+  padding: 1px 5px;
+  line-height: 1;
+}
+
+#shell-picker-btn {
+  font-size: 9px;
+  padding: 2px 3px;
+  margin-left: 1px;
+}
+
+#new-tab-btn:hover,
+#shell-picker-btn:hover {
+  background: var(--tab-hover);
+  color: var(--fg);
+}
+
+/* --- Shell picker dropdown --- */
+
+.dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 4px;
+  background: rgba(30, 30, 40, 0.98);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  padding: 4px 0;
+  min-width: 160px;
+  z-index: 100;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+.dropdown.hidden {
+  display: none;
+}
+
+.dropdown-item {
+  padding: 5px 12px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 11px;
+  color: var(--fg-muted);
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.dropdown-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--fg);
+}
+
+.dropdown-item.current {
+  color: #4ade80;
+}
+
 /* --- Terminal --- */
 
-#terminal-container {
+#terminal-wrapper {
   flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+.tab-terminal {
+  position: absolute;
+  inset: 0;
   padding: 4px 4px 0;
   overflow: hidden;
 }
 
-#terminal-container .xterm {
+.tab-terminal .xterm {
   height: 100%;
 }
 
-#terminal-container .xterm-screen {
+.tab-terminal .xterm-screen {
   height: 100%;
 }
 

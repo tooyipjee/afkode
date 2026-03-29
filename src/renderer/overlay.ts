@@ -1,4 +1,7 @@
-import { fitTerminal, focusTerminal, getTerminal, setCursorBlink } from './terminal';
+import { fitTerminal, focusTerminal, setCursorBlink } from './terminal';
+import { addTab, closeTab, switchToNextTab, switchToPrevTab, switchToTabIndex, getTabCount } from './tabs';
+import { getActiveTabId } from './terminal';
+import type { Terminal } from '@xterm/xterm';
 
 let visible = false;
 let resizeRaf: number | null = null;
@@ -29,19 +32,8 @@ export function setupOverlayEvents(): void {
     window.electronAPI.notifyVisibility(false);
   });
 
-  const term = getTerminal();
-  if (term) {
-    term.attachCustomKeyEventHandler((e) => {
-      if (e.key === 'Escape' && e.type === 'keydown') {
-        window.electronAPI.hideOverlay();
-        return false;
-      }
-      return true;
-    });
-  }
-
-  const container = document.getElementById('terminal-container');
-  if (!container) return;
+  const wrapper = document.getElementById('terminal-wrapper');
+  if (!wrapper) return;
 
   const resizeObserver = new ResizeObserver(() => {
     if (visible && !resizeRaf) {
@@ -51,7 +43,56 @@ export function setupOverlayEvents(): void {
       });
     }
   });
-  resizeObserver.observe(container);
+  resizeObserver.observe(wrapper);
+}
+
+export function attachTerminalKeyHandler(terminal: Terminal): void {
+  const isMac = navigator.platform.includes('Mac');
+
+  terminal.attachCustomKeyEventHandler((e) => {
+    if (e.type !== 'keydown') return true;
+
+    if (e.key === 'Escape') {
+      window.electronAPI.hideOverlay();
+      return false;
+    }
+
+    const mod = isMac ? e.metaKey : e.ctrlKey;
+    const shift = e.shiftKey;
+
+    // New tab: Cmd+T (Mac) or Ctrl+Shift+T (Win/Linux)
+    if (e.key.toLowerCase() === 't' && mod && (isMac ? !shift : shift)) {
+      addTab();
+      return false;
+    }
+
+    // Close tab: Cmd+W (Mac) or Ctrl+Shift+W (Win/Linux)
+    if (e.key.toLowerCase() === 'w' && mod && (isMac ? !shift : shift)) {
+      const activeId = getActiveTabId();
+      if (activeId) closeTab(activeId);
+      return false;
+    }
+
+    // Next tab: Ctrl+Tab
+    if (e.key === 'Tab' && e.ctrlKey && !shift) {
+      switchToNextTab();
+      return false;
+    }
+
+    // Previous tab: Ctrl+Shift+Tab
+    if (e.key === 'Tab' && e.ctrlKey && shift) {
+      switchToPrevTab();
+      return false;
+    }
+
+    // Switch to tab by number: Ctrl/Cmd + 1-9
+    if (mod && e.key >= '1' && e.key <= '9') {
+      switchToTabIndex(parseInt(e.key) - 1);
+      return false;
+    }
+
+    return true;
+  });
 }
 
 export function isOverlayVisible(): boolean {
