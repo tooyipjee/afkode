@@ -24,8 +24,7 @@ describe('preload — exposeInMainWorld', () => {
     expect(exposedApi.getConfig).toBeTypeOf('function');
     expect(exposedApi.hideOverlay).toBeTypeOf('function');
     expect(exposedApi.notifyVisibility).toBeTypeOf('function');
-    expect(exposedApi.openBugReport).toBeTypeOf('function');
-    expect(exposedApi.openFeatureRequest).toBeTypeOf('function');
+    expect(exposedApi.openFeedback).toBeTypeOf('function');
     expect(exposedApi.getWindowBounds).toBeTypeOf('function');
     expect(exposedApi.setWindowBounds).toBeTypeOf('function');
   });
@@ -89,14 +88,9 @@ describe('preload — IPC methods', () => {
     expect(ipcRenderer.send).toHaveBeenCalledWith('overlay:visibility', false);
   });
 
-  it('openBugReport sends app:open-bug-report', () => {
-    exposedApi.openBugReport();
-    expect(ipcRenderer.send).toHaveBeenCalledWith('app:open-bug-report');
-  });
-
-  it('openFeatureRequest sends app:open-feature-request', () => {
-    exposedApi.openFeatureRequest();
-    expect(ipcRenderer.send).toHaveBeenCalledWith('app:open-feature-request');
+  it('openFeedback sends app:open-feedback', () => {
+    exposedApi.openFeedback();
+    expect(ipcRenderer.send).toHaveBeenCalledWith('app:open-feedback');
   });
 
   it('getWindowBounds invokes window:getBounds', () => {

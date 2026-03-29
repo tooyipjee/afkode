@@ -22,8 +22,7 @@ declare global {
       getConfig: () => Promise<Record<string, unknown>>;
       hideOverlay: () => void;
       notifyVisibility: (visible: boolean) => void;
-      openBugReport: () => void;
-      openFeatureRequest: () => void;
+      openFeedback: () => void;
       getWindowBounds: () => Promise<{ x: number; y: number; width: number; height: number }>;
       setWindowBounds: (bounds: { x: number; y: number; width: number; height: number }) => void;
     };
@@ -97,54 +96,8 @@ function setupFeedbackButton(): void {
 
   btn.addEventListener('click', (e) => {
     e.stopPropagation();
-    showFeedbackMenu(btn);
+    window.electronAPI.openFeedback();
   });
-}
-
-function showFeedbackMenu(anchor: HTMLElement): void {
-  let menu = document.getElementById('feedback-menu');
-  if (menu) {
-    menu.remove();
-    return;
-  }
-
-  menu = document.createElement('div');
-  menu.id = 'feedback-menu';
-  menu.className = 'dropdown';
-  menu.style.position = 'fixed';
-
-  const rect = anchor.getBoundingClientRect();
-  menu.style.top = `${rect.bottom + 4}px`;
-  menu.style.right = `${window.innerWidth - rect.right}px`;
-  menu.style.left = 'auto';
-
-  const bugItem = document.createElement('div');
-  bugItem.className = 'dropdown-item';
-  bugItem.textContent = '\uD83D\uDC1B  Report a Bug';
-  bugItem.addEventListener('click', () => {
-    window.electronAPI.openBugReport();
-    menu!.remove();
-  });
-
-  const featureItem = document.createElement('div');
-  featureItem.className = 'dropdown-item';
-  featureItem.textContent = '\u2728  Request a Feature';
-  featureItem.addEventListener('click', () => {
-    window.electronAPI.openFeatureRequest();
-    menu!.remove();
-  });
-
-  menu.appendChild(bugItem);
-  menu.appendChild(featureItem);
-  document.body.appendChild(menu);
-
-  const dismiss = (ev: MouseEvent) => {
-    if (!menu!.contains(ev.target as Node)) {
-      menu!.remove();
-      document.removeEventListener('click', dismiss);
-    }
-  };
-  setTimeout(() => document.addEventListener('click', dismiss), 0);
 }
 
 init().catch((err) => {

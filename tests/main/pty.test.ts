@@ -57,12 +57,11 @@ describe('pty — registration', () => {
     expect(ipcMain.handle).toHaveBeenCalledWith('window:getBounds', expect.any(Function));
   });
 
-  it('registers window:setBounds and bug report listeners', () => {
+  it('registers window:setBounds and feedback listener', () => {
     createPty(mockWindow);
     const channels = (ipcMain.on as any).mock.calls.map((c: any) => c[0]);
     expect(channels).toContain('window:setBounds');
-    expect(channels).toContain('app:open-bug-report');
-    expect(channels).toContain('app:open-feature-request');
+    expect(channels).toContain('app:open-feedback');
   });
 });
 
@@ -577,7 +576,7 @@ describe('pty — window bounds', () => {
   });
 });
 
-describe('pty — feedback links', () => {
+describe('pty — feedback link', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     clearSpawnedInstances();
@@ -586,25 +585,11 @@ describe('pty — feedback links', () => {
   });
   afterEach(() => destroyPty());
 
-  it('app:open-bug-report opens GitHub bug report URL', () => {
-    const listener = getListener('app:open-bug-report');
+  it('app:open-feedback opens GitHub issue chooser URL', () => {
+    const listener = getListener('app:open-feedback');
     listener({});
     expect(shell.openExternal).toHaveBeenCalledWith(
-      expect.stringContaining('github.com/jasontoo/afkode/issues/new'),
-    );
-    expect(shell.openExternal).toHaveBeenCalledWith(
-      expect.stringContaining('labels=bug'),
-    );
-  });
-
-  it('app:open-feature-request opens GitHub feature request URL', () => {
-    const listener = getListener('app:open-feature-request');
-    listener({});
-    expect(shell.openExternal).toHaveBeenCalledWith(
-      expect.stringContaining('github.com/jasontoo/afkode/issues/new'),
-    );
-    expect(shell.openExternal).toHaveBeenCalledWith(
-      expect.stringContaining('labels=enhancement'),
+      'https://github.com/tooyipjee/afkode/issues/new/choose',
     );
   });
 });
@@ -635,8 +620,7 @@ describe('pty — destroyPty', () => {
     expect(ipcMain.removeAllListeners).toHaveBeenCalledWith('pty:resize');
     expect(ipcMain.removeAllListeners).toHaveBeenCalledWith('pty:close');
     expect(ipcMain.removeAllListeners).toHaveBeenCalledWith('overlay:visibility');
-    expect(ipcMain.removeAllListeners).toHaveBeenCalledWith('app:open-bug-report');
-    expect(ipcMain.removeAllListeners).toHaveBeenCalledWith('app:open-feature-request');
+    expect(ipcMain.removeAllListeners).toHaveBeenCalledWith('app:open-feedback');
     expect(ipcMain.removeAllListeners).toHaveBeenCalledWith('window:setBounds');
     expect(ipcMain.removeHandler).toHaveBeenCalledWith('config:get');
     expect(ipcMain.removeHandler).toHaveBeenCalledWith('config:set');

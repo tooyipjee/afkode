@@ -3,7 +3,7 @@ import { getAllConfig, getConfig, setConfig, getAvailableShells } from './config
 import { homedir } from 'os';
 import * as nodePty from 'node-pty';
 
-const REPO_URL = 'https://github.com/jasontoo/afkode';
+const REPO_URL = 'https://github.com/tooyipjee/afkode';
 
 const isWin = process.platform === 'win32';
 
@@ -155,12 +155,8 @@ export function createPty(win: BrowserWindow): void {
     }
   });
 
-  ipcMain.on('app:open-bug-report', () => {
-    shell.openExternal(`${REPO_URL}/issues/new?template=bug_report.md&labels=bug`);
-  });
-
-  ipcMain.on('app:open-feature-request', () => {
-    shell.openExternal(`${REPO_URL}/issues/new?template=feature_request.md&labels=enhancement`);
+  ipcMain.on('app:open-feedback', () => {
+    shell.openExternal(`${REPO_URL}/issues/new/choose`);
   });
 
   ipcMain.handle('window:getBounds', () => {
@@ -188,8 +184,7 @@ export function destroyPty(): void {
   ipcMain.removeAllListeners('pty:resize');
   ipcMain.removeAllListeners('pty:close');
   ipcMain.removeAllListeners('overlay:visibility');
-  ipcMain.removeAllListeners('app:open-bug-report');
-  ipcMain.removeAllListeners('app:open-feature-request');
+  ipcMain.removeAllListeners('app:open-feedback');
   ipcMain.removeAllListeners('window:setBounds');
   try { ipcMain.removeHandler('config:get'); } catch {}
   try { ipcMain.removeHandler('config:set'); } catch {}
