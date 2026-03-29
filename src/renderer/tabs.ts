@@ -46,6 +46,10 @@ export async function addTab(shell?: string): Promise<string> {
   const terminal = createTerminal(terminalWrapper, result.tabId);
   attachTerminalKeyHandler(terminal);
 
+  if (result.error) {
+    terminal.write(`\r\n\x1b[31mError: ${result.error} (${result.shell})\x1b[0m\r\n`);
+  }
+
   const tab: Tab = {
     id: result.tabId,
     title: result.shellName,
@@ -58,9 +62,11 @@ export async function addTab(shell?: string): Promise<string> {
   return result.tabId;
 }
 
+let closingInProgress = false;
+
 export function closeTab(tabId: string): void {
   const idx = tabList.findIndex((t) => t.id === tabId);
-  if (idx === -1) return;
+  if (idx === -1 || closingInProgress) return;
 
   window.electronAPI.closePtyTab(tabId);
   removeTab(tabId);
@@ -70,7 +76,8 @@ export function closeTab(tabId: string): void {
   tabList.splice(idx, 1);
 
   if (tabList.length === 0) {
-    addTab();
+    closingInProgress = true;
+    addTab().finally(() => { closingInProgress = false; });
     return;
   }
 

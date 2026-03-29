@@ -73,6 +73,8 @@ if (!gotLock) {
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
+      cleaned = false;
+      destroyPty();
       const win = initWindow();
       createPty(win);
     }

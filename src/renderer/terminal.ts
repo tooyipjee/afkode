@@ -180,8 +180,8 @@ export function getTerminalForTab(tabId: string): Terminal | null {
   return tabs.get(tabId)?.terminal ?? null;
 }
 
-export function applyThemeToAll(themeColors: Record<string, string>): void {
-  currentThemeId = Object.keys(themeColors).length > 0 ? currentThemeId : 'afkode';
+export function applyThemeToAll(themeId: string, themeColors: Record<string, string>): void {
+  currentThemeId = themeId;
   for (const [, tab] of tabs) {
     tab.terminal.options.theme = themeColors;
   }

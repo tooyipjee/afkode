@@ -2,7 +2,7 @@ import '@xterm/xterm/css/xterm.css';
 import { focusTerminal, writeToTab, setInitialConfig } from './terminal';
 import { setupOverlayEvents } from './overlay';
 import { initTabs, addTab, handlePtyExit } from './tabs';
-import { initSettings, toggleSettings } from './settings';
+import { initSettings, toggleSettings, getCurrentThemeId } from './settings';
 import { getTheme } from './themes';
 import { initResize } from './resize';
 
@@ -11,7 +11,7 @@ declare global {
     electronAPI: {
       onPtyData: (callback: (tabId: string, data: string) => void) => void;
       onPtyExit: (callback: (tabId: string, exitCode: number) => void) => void;
-      createPtyTab: (shell?: string) => Promise<{ tabId: string; shell: string; shellName: string }>;
+      createPtyTab: (shell?: string) => Promise<{ tabId: string; shell: string; shellName: string; error?: string }>;
       closePtyTab: (tabId: string) => void;
       sendPtyInput: (tabId: string, data: string) => void;
       sendPtyResize: (tabId: string, cols: number, rows: number) => void;
@@ -82,7 +82,7 @@ async function init() {
   window.electronAPI.onConfigUpdate((update) => {
     if (update.opacity !== undefined) {
       const val = update.opacity as number;
-      const t = getTheme((config.theme as string) || 'afkode');
+      const t = getTheme(getCurrentThemeId());
       document.documentElement.style.setProperty('--opacity', String(val));
       document.documentElement.style.setProperty('--bg', t.overlayBg(val));
     }

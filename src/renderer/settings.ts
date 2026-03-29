@@ -47,6 +47,10 @@ export function isSettingsOpen(): boolean {
   return open;
 }
 
+export function getCurrentThemeId(): string {
+  return currentThemeId;
+}
+
 function setupKeyboardClose(): void {
   document.addEventListener('keydown', (e) => {
     if (!open) return;
@@ -67,7 +71,7 @@ function buildSettingsContent(): void {
       <div class="settings-row">
         <label class="settings-label">Default Shell</label>
         <select id="setting-shell" class="settings-select">
-          ${shells.map((s) => `<option value="${s.path}" ${s.path === defaultShell ? 'selected' : ''}>${s.name}</option>`).join('')}
+          ${shells.map((s) => `<option value="${escapeHtml(s.path)}" ${s.path === defaultShell ? 'selected' : ''}>${escapeHtml(s.name)}</option>`).join('')}
         </select>
       </div>
       <div class="settings-row">
@@ -109,6 +113,10 @@ function buildSettingsContent(): void {
   `;
 
   bindEvents();
+}
+
+function escapeHtml(str: string): string {
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
 function bindEvents(): void {
@@ -170,7 +178,7 @@ function applyFontSize(): void {
 function applyTheme(id: string): void {
   currentThemeId = id;
   const theme = getTheme(id);
-  applyThemeToAll(theme.terminal);
+  applyThemeToAll(id, theme.terminal);
 
   document.documentElement.style.setProperty('--bg', theme.overlayBg(currentOpacity));
 

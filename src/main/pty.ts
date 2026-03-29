@@ -1,5 +1,6 @@
 import { BrowserWindow, ipcMain, shell } from 'electron';
 import { getAllConfig, getConfig, setConfig, getAvailableShells } from './config';
+import { refreshTray } from './tray';
 import { homedir } from 'os';
 import * as nodePty from 'node-pty';
 
@@ -42,8 +43,8 @@ function flushSession(tabId: string): void {
   }
 }
 
-function spawnForTab(tabId: string, shellPath: string): void {
-  if (!targetWin || targetWin.isDestroyed()) return;
+function spawnForTab(tabId: string, shellPath: string): boolean {
+  if (!targetWin || targetWin.isDestroyed()) return false;
   const win = targetWin;
 
   try {
@@ -88,15 +89,11 @@ function spawnForTab(tabId: string, shellPath: string): void {
         win.webContents.send('pty:exit', tabId, exitCode);
       }
     });
+
+    return true;
   } catch (err) {
     console.error('Failed to spawn PTY:', err);
-    if (win && !win.isDestroyed()) {
-      win.webContents.send(
-        'pty:data',
-        tabId,
-        `\r\n\x1b[31mError: Failed to start shell: ${err}\x1b[0m\r\n`,
-      );
-    }
+    return false;
   }
 }
 
@@ -111,14 +108,15 @@ export function createPty(win: BrowserWindow): void {
 
   ipcMain.handle('config:set', (_event, key: string, value: unknown) => {
     setConfig(key as any, value as any);
+    refreshTray();
   });
 
   ipcMain.handle('pty:create', (_event, shell?: string) => {
     const tabId = `tab-${nextId++}`;
     const shellPath = shell || getConfig('shellPath');
-    spawnForTab(tabId, shellPath);
+    const ok = spawnForTab(tabId, shellPath);
     const shellName = shellPath.split(/[/\\]/).pop() || 'shell';
-    return { tabId, shell: shellPath, shellName };
+    return { tabId, shell: shellPath, shellName, error: ok ? undefined : 'Failed to start shell' };
   });
 
   ipcMain.on('pty:input', (_event, tabId: string, data: string) => {

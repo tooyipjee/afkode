@@ -508,19 +508,14 @@ describe('pty — spawn error handling', () => {
   });
   afterEach(() => destroyPty());
 
-  it('sends error message to renderer when spawn fails', () => {
+  it('returns error field when spawn fails', () => {
     (spawn as any).mockImplementationOnce(() => { throw new Error('spawn failed'); });
     createPty(mockWindow);
     const handler = getHandler('pty:create');
     const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
-    handler({});
-
-    expect(mockWindow.webContents.send).toHaveBeenCalledWith(
-      'pty:data',
-      expect.stringMatching(/^tab-/),
-      expect.stringContaining('Error: Failed to start shell'),
-    );
+    const result = handler({});
+    expect(result.error).toBe('Failed to start shell');
     spy.mockRestore();
   });
 
@@ -533,6 +528,14 @@ describe('pty — spawn error handling', () => {
     const result = handler({});
     expect(result.tabId).toMatch(/^tab-/);
     expect(result.shell).toBeDefined();
+    expect(result.error).toBeDefined();
+  });
+
+  it('returns no error field on successful spawn', () => {
+    createPty(mockWindow);
+    const handler = getHandler('pty:create');
+    const result = handler({});
+    expect(result.error).toBeUndefined();
   });
 });
 

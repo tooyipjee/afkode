@@ -65,6 +65,10 @@ function updateTrayMenu(): void {
   tray.setContextMenu(contextMenu);
 }
 
+export function refreshTray(): void {
+  updateTrayMenu();
+}
+
 export function destroyTray(): void {
   if (tray) {
     tray.destroy();

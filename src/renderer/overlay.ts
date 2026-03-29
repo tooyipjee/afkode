@@ -4,7 +4,7 @@ import { getActiveTabId } from './terminal';
 import { toggleSettings, isSettingsOpen, closeSettings } from './settings';
 import type { Terminal } from '@xterm/xterm';
 
-let visible = false;
+let visible = true;
 let resizeRaf: number | null = null;
 
 export function setupOverlayEvents(): void {
