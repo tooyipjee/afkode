@@ -40,6 +40,7 @@ export const app = {
   requestSingleInstanceLock: vi.fn(() => true),
   commandLine: { appendSwitch: vi.fn() },
   getPath: vi.fn((name: string) => `/mock/${name}`),
+  setLoginItemSettings: vi.fn(),
   isPackaged: false,
 };
 

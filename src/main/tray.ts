@@ -57,6 +57,17 @@ function updateTrayMenu(): void {
     },
     { type: 'separator' },
     {
+      label: 'Start on Boot',
+      type: 'checkbox',
+      checked: getConfig('startOnBoot'),
+      click: (menuItem) => {
+        setConfig('startOnBoot', menuItem.checked);
+        app.setLoginItemSettings({ openAtLogin: menuItem.checked });
+        sendToWindow('config:update', { startOnBoot: menuItem.checked });
+      },
+    },
+    { type: 'separator' },
+    {
       label: 'Quit',
       click: () => app.quit(),
     },

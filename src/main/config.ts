@@ -83,6 +83,7 @@ interface OverlayConfig {
   windowBounds: { x: number; y: number; width: number; height: number } | null;
   fontSize: number;
   theme: string;
+  startOnBoot: boolean;
 }
 
 const defaults: OverlayConfig = {
@@ -92,6 +93,7 @@ const defaults: OverlayConfig = {
   windowBounds: null,
   fontSize: 13,
   theme: 'afkode',
+  startOnBoot: false,
 };
 
 let store: Store<OverlayConfig>;
@@ -124,6 +126,9 @@ export function getConfig<K extends keyof OverlayConfig>(key: K): OverlayConfig[
     const s = val as string;
     if (typeof s !== 'string' || !VALID_THEMES.includes(s)) return defaults.theme as OverlayConfig[K];
   }
+  if (key === 'startOnBoot') {
+    if (typeof val !== 'boolean') return defaults.startOnBoot as OverlayConfig[K];
+  }
   return val;
 }
 
@@ -139,6 +144,7 @@ export function getAllConfig(): OverlayConfig {
     windowBounds: getConfig('windowBounds'),
     fontSize: getConfig('fontSize'),
     theme: getConfig('theme'),
+    startOnBoot: getConfig('startOnBoot'),
   };
 }
 

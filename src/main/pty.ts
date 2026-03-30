@@ -1,4 +1,4 @@
-import { BrowserWindow, ipcMain, shell } from 'electron';
+import { app, BrowserWindow, ipcMain, shell } from 'electron';
 import { getAllConfig, getConfig, setConfig, getAvailableShells } from './config';
 import { refreshTray } from './tray';
 import { homedir } from 'os';
@@ -7,6 +7,14 @@ import * as nodePty from 'node-pty';
 const REPO_URL = 'https://github.com/tooyipjee/afkode';
 
 const isWin = process.platform === 'win32';
+
+function applyLoginItem(enabled: boolean): void {
+  try {
+    app.setLoginItemSettings({ openAtLogin: enabled });
+  } catch (err) {
+    console.error('Failed to set login item:', err);
+  }
+}
 
 let cachedEnv: Record<string, string> | null = null;
 function getSpawnEnv(): Record<string, string> {
@@ -102,6 +110,8 @@ function spawnForTab(tabId: string, shellPath: string): boolean {
 export function createPty(win: BrowserWindow): void {
   targetWin = win;
 
+  applyLoginItem(getConfig('startOnBoot'));
+
   ipcMain.handle('config:get', () => ({
     ...getAllConfig(),
     platform: process.platform,
@@ -110,6 +120,9 @@ export function createPty(win: BrowserWindow): void {
 
   ipcMain.handle('config:set', (_event, key: string, value: unknown) => {
     setConfig(key as any, value as any);
+    if (key === 'startOnBoot') {
+      applyLoginItem(value as boolean);
+    }
     refreshTray();
   });
 

@@ -86,6 +86,10 @@ async function init() {
       document.documentElement.style.setProperty('--opacity', String(val));
       document.documentElement.style.setProperty('--bg', t.overlayBg(val));
     }
+    if (update.startOnBoot !== undefined) {
+      const cb = document.getElementById('setting-start-on-boot') as HTMLInputElement | null;
+      if (cb) cb.checked = update.startOnBoot as boolean;
+    }
   });
 }
 

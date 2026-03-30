@@ -8,6 +8,8 @@ let currentFontSize = 13;
 let currentOpacity = 0.95;
 let platform = 'darwin';
 
+let startOnBoot = false;
+
 interface ShellInfo { path: string; name: string }
 let shells: ShellInfo[] = [];
 let defaultShell = '';
@@ -20,6 +22,7 @@ export function initSettings(config: Record<string, unknown>): void {
   platform = (config.platform as string) || 'darwin';
   shells = (config.availableShells as ShellInfo[]) || [];
   defaultShell = (config.shellPath as string) || '';
+  startOnBoot = (config.startOnBoot as boolean) || false;
 
   buildSettingsContent();
   setupKeyboardClose();
@@ -95,6 +98,13 @@ function buildSettingsContent(): void {
           <span id="opacity-val" class="slider-val">${Math.round(currentOpacity * 100)}%</span>
         </div>
       </div>
+      <div class="settings-row">
+        <label class="settings-label">Start on Boot</label>
+        <label class="settings-toggle">
+          <input type="checkbox" id="setting-start-on-boot" ${startOnBoot ? 'checked' : ''} />
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
     </div>
     <div class="settings-divider"></div>
     <div class="shortcuts-section">
@@ -160,6 +170,14 @@ function bindEvents(): void {
     });
     opacitySlider.addEventListener('change', () => {
       window.electronAPI.setConfig('opacity', currentOpacity);
+    });
+  }
+
+  const bootCheckbox = document.getElementById('setting-start-on-boot') as HTMLInputElement | null;
+  if (bootCheckbox) {
+    bootCheckbox.addEventListener('change', () => {
+      startOnBoot = bootCheckbox.checked;
+      window.electronAPI.setConfig('startOnBoot', startOnBoot);
     });
   }
 

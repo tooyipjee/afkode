@@ -18,6 +18,10 @@ describe('config', () => {
     expect(getConfig('theme')).toBe('afkode');
   });
 
+  it('returns default startOnBoot', () => {
+    expect(getConfig('startOnBoot')).toBe(false);
+  });
+
   it('returns a shell path', () => {
     const shell = getConfig('shellPath');
     expect(typeof shell).toBe('string');
@@ -53,6 +57,18 @@ describe('config', () => {
     setConfig('windowBounds', null);
   });
 
+  it('setConfig persists startOnBoot', () => {
+    setConfig('startOnBoot', true);
+    expect(getConfig('startOnBoot')).toBe(true);
+    setConfig('startOnBoot', false);
+  });
+
+  it('validates startOnBoot — returns default for non-boolean', () => {
+    setConfig('startOnBoot', 'yes' as any);
+    expect(getConfig('startOnBoot')).toBe(false);
+    setConfig('startOnBoot', false);
+  });
+
   it('getAllConfig returns full config with validated values', () => {
     const config = getAllConfig();
     expect(config).toHaveProperty('hotkey');
@@ -61,6 +77,7 @@ describe('config', () => {
     expect(config).toHaveProperty('windowBounds');
     expect(config).toHaveProperty('fontSize');
     expect(config).toHaveProperty('theme');
+    expect(config).toHaveProperty('startOnBoot');
   });
 
   it('validates opacity — returns default for negative', () => {

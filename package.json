@@ -1,6 +1,6 @@
 {
   "name": "afkode",
-  "version": "0.4.5",
+  "version": "0.5.0",
   "description": "AFKode — terminal overlay for gamers, code while you're dead",
   "main": "dist-electron/main/index.js",
   "scripts": {
