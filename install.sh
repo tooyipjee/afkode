@@ -86,11 +86,21 @@ install_macos() {
   if [ -z "$APP_BUNDLE" ]; then
     fail "Could not find .app bundle in archive"
   fi
-  if [ -d "/Applications/$(basename "$APP_BUNDLE")" ]; then
-    rm -rf "/Applications/$(basename "$APP_BUNDLE")"
+  DEST="/Applications/$(basename "$APP_BUNDLE")"
+
+  # Kill running instance before overwriting
+  pkill -f "$(basename "$APP_BUNDLE" .app)" 2>/dev/null || true
+  sleep 0.5
+
+  if [ -d "$DEST" ]; then
+    rm -rf "$DEST"
   fi
   mv "$APP_BUNDLE" /Applications/
-  info "Installed to /Applications/$(basename "$APP_BUNDLE")"
+  # Remove Gatekeeper quarantine so app launches without warnings
+  xattr -rd com.apple.quarantine "$DEST" 2>/dev/null || true
+  info "Installed to $DEST"
+  info "Launching $APP_NAME..."
+  open "$DEST"
 }
 
 install_linux() {
